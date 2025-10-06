@@ -1,0 +1,45 @@
+{
+  "keepMemories": "Keep memories alive", 
+  "edit": {
+    "button": "Customize Your Card",
+    "title": "Customize Your Card",
+    "placeholder": "Edit your text here...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "chars": "{{count}}/{{max}} chars",
+    "defaultText": "The Grand Egyptian Museum"
+  },
+  "email": {
+    "title": "Enter your email to view and share your images",
+    "placeholder": "you@example.com",
+    "saving": "Saving...",
+    "submit": "Submit",
+    "usePrev": "Use previous email ({{email}})"
+  },
+  "share": {
+    "email": "Send via Email",
+    "emailWith": "Send to {{email}}",
+    "social": "Share via Social Media",
+    "button": "Share via Social Media",
+    "title": "Check out these images!",
+    "text": "I wanted to share these with you",
+    "error": "Failed to share the images."
+  },
+  "footer": {
+    "text": "THIS WEBPAGE WAS DEVELOPED BY THE",
+    "team": "GEM HACKATHON 2024 TEAM"
+  },
+  "marquee": {
+    "keepMemories": "Keep memories alive"
+  },
+  "buttons": {
+    "share": "Share"
+  },
+  "alertPhotoBooth": "Get via Email",
+  "alerts": {
+    "noEmail": "No email found. Please enter your email first.",
+    "saveSuccess": "📧 Email {{email}} saved (dev mode, no SES yet)",
+    "saveError": "Failed to save email.",
+    "prepareError": "Error preparing email."
+  }
+}

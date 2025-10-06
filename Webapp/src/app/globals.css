@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* Cairo Font Family */
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-Regular-BF643384ef31630.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-Bold-BF643384ee22aa6.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-Light-BF643384ef1c5f4.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-Medium-BF643384ef5d193.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-SemiBold-BF643384ef0a2e7.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-ExtraBold-BF643384ef234bf.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/cairo-font-family/Cairo-Black-BF643384ef038f.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mariam';
+  src: url('/fonts/Mariam-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Averia Libre';
+  src: url('/fonts/Averia-Libre/AveriaLibre-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* Utility classes */
+.font-averia {
+  font-family: 'Averia Libre', sans-serif;
+}
+.font-mariam {
+  font-family: 'Mariam', serif;
+}
+.font-cairo {
+  font-family: 'Cairo', sans-serif;
+}
+
+
+/* Arabic - applied when html lang="ar" */
+html[lang="ar"] body {
+  font-family: 'Cairo', 'Cairo', 'Averia', Arial, Helvetica, sans-serif;
+}
+
+/* English and other LTR languages */
+html[lang="en"] body {
+  font-family: 'Cairo', 'Mariam', 'Averia', Arial, Helvetica, sans-serif;
+}
+
+/* ------------------------
+   Global Defaults & Theme
+------------------------- */
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+:root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Cairo', Arial, Helvetica, sans-serif;
+  --font-mono: monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Default fallback if lang is not set */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Mariam','Cairo', Arial, Helvetica, sans-serif;
+}
