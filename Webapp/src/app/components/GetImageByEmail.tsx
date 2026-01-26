@@ -47,7 +47,7 @@ const EmailButton: React.FC<EmailButtonProps> = ({cardBlob, className }) => {
             const cardBase64 = await blobToBase64(cardBlob);
 
             // 2. Call the Send Image Email Lambda
-            const res = await fetch("https://0h1wf39rwc.execute-api.us-east-1.amazonaws.com/prod/send-image-email", {
+            const res = await fetch(process.env.NEXT_PUBLIC_SEND_IMAGE_EMAIL_URL || "", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

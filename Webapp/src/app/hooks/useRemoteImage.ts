@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from "react";
 
-const API_BASE_URL = "https://x4te0ngsjb.execute-api.us-east-1.amazonaws.com/prod/images";
+const API_BASE_URL = process.env.NEXT_PUBLIC_AWS_API_BASE_URL || "";
 
 // Extract image ID from query parameters
 export const getImageFromUrl = (): string | null => {

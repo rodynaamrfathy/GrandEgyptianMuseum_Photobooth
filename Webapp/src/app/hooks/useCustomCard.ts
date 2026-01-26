@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchImageAsBlob } from "./useRemoteImage";
 import { createCardWithText } from "../utils/createCardWithText";
 
-const cardTemplateUrl =
-  "https://res.cloudinary.com/dynfn6e5m/image/upload/v1746278397/uploads/1746278397692.png";
+const cardTemplateUrl = process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL || "";
 
 export function useCustomCard(editText: string) {
   const [templateBlob, setTemplateBlob] = useState<Blob | null>(null);
