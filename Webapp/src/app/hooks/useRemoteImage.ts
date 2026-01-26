@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect } from "react";
 
-// Extract image URL from query parameters
+const API_BASE_URL = "https://x4te0ngsjb.execute-api.us-east-1.amazonaws.com/prod/images";
+
+// Extract image ID from query parameters
 export const getImageFromUrl = (): string | null => {
   if (typeof window !== "undefined") {
     const urlParams = new URLSearchParams(window.location.search);
@@ -10,7 +12,7 @@ export const getImageFromUrl = (): string | null => {
   return null;
 };
 
-// Fetch Image as Blob
+// Fetch Image as Blob from any URL
 export const fetchImageAsBlob = async (url: string): Promise<Blob> => {
   try {
     const response = await fetch(url);
@@ -24,19 +26,30 @@ export const fetchImageAsBlob = async (url: string): Promise<Blob> => {
   }
 };
 
+// Fetch Image as Blob from AWS API by Image ID
+export const fetchImageFromAWSAPI = async (imageId: string): Promise<Blob> => {
+  try {
+    const apiUrl = `${API_BASE_URL}/${imageId}`;
+    return await fetchImageAsBlob(apiUrl);
+  } catch (error: unknown) {
+    console.error("Failed to fetch image from AWS:", error);
+    throw error;
+  }
+};
+
 // React Hook Implementation
 export const useRemoteImage = () => {
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageId, setImageId] = useState<string>("");
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const queryImageUrl = getImageFromUrl();
-    if (queryImageUrl) {
-      setImageUrl(queryImageUrl);
+    const queryImageId = getImageFromUrl();
+    if (queryImageId) {
+      setImageId(queryImageId);
       setLoading(true);
-      fetchImageAsBlob(queryImageUrl)
+      fetchImageFromAWSAPI(queryImageId)
         .then(blob => {
           setImageBlob(blob);
           setError(null);
@@ -49,5 +62,5 @@ export const useRemoteImage = () => {
     }
   }, []);
 
-  return { imageUrl, imageBlob, loading, error };
+  return { imageId, imageBlob, loading, error };
 };

@@ -23,7 +23,8 @@
     "button": "Share via Social Media",
     "title": "Check out these images!",
     "text": "I wanted to share these with you",
-    "error": "Failed to share the images."
+    "error": "Failed to share the images.",
+    "sending": "sending ..."
   },
   "footer": {
     "text": "THIS WEBPAGE WAS DEVELOPED BY THE",
@@ -38,7 +39,7 @@
   "alertPhotoBooth": "Get via Email",
   "alerts": {
     "noEmail": "No email found. Please enter your email first.",
-    "saveSuccess": "📧 Email {{email}} saved (dev mode, no SES yet)",
+    "saveSuccess": "📧 Email {{email}} Sent",
     "saveError": "Failed to save email.",
     "prepareError": "Error preparing email."
   }
