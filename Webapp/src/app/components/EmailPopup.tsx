@@ -46,7 +46,7 @@ export default function EmailPopup({
     setError("");
 
     try {
-      const res = await fetch("https://m6xzgpv05l.execute-api.us-east-1.amazonaws.com/prod/save-email", {
+      const res = await fetch(process.env.NEXT_PUBLIC_SAVE_EMAIL_URL || "", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

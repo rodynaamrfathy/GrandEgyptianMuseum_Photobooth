@@ -17,8 +17,19 @@ const EmailButton: React.FC<EmailButtonProps> = ({cardBlob, className }) => {
     const imageId = searchParams.get("image");
 
     useEffect(() => {
+        // Read initial email from localStorage
         const savedEmail = localStorage.getItem("userEmail");
         if (savedEmail) setUserEmail(savedEmail);
+
+        // Listen for storage changes from other components/tabs
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "userEmail" && e.newValue) {
+                setUserEmail(e.newValue);
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
     // Helper to convert Blob to Base64 for the Lambda payload
