@@ -1,15 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import SubmitButton from "./SubmitButton";
-import {useSearchParams} from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface EmailPopupProps {
     onSubmit: (email: string) => void;
 }
 
-export default function EmailPopup({
-                                       onSubmit,
-                                   }: EmailPopupProps) {
+// 1. This is the inner component that actually uses the Search Params
+function EmailPopupContent({ onSubmit }: EmailPopupProps) {
     const [email, setEmail] = useState("");
     const [prevEmail, setPrevEmail] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -18,6 +17,7 @@ export default function EmailPopup({
     const searchParams = useSearchParams();
     const imageId = searchParams.get("image");
     const [kioskName, filterName, timestamp] = imageId ? imageId.split("_") : ["", "", ""];
+
     useEffect(() => {
         const storedEmail = localStorage.getItem("userEmail");
         if (storedEmail) {
@@ -56,7 +56,7 @@ export default function EmailPopup({
 
             if (res.ok && data.success) {
                 localStorage.setItem("userEmail", emailToSave);
-                onSubmit(emailToSave); // Triggers parent state update
+                onSubmit(emailToSave);
             } else {
                 setError(data.error || "Failed to save email.");
             }
@@ -104,5 +104,14 @@ export default function EmailPopup({
                 </form>
             </div>
         </div>
+    );
+}
+
+// 2. This is the exported component that wraps the content in Suspense
+export default function EmailPopup(props: EmailPopupProps) {
+    return (
+        <Suspense fallback={null}>
+            <EmailPopupContent {...props} />
+        </Suspense>
     );
 }
