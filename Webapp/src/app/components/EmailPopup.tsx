@@ -1,27 +1,23 @@
 "use client";
 import { useState, useEffect } from "react";
 import SubmitButton from "./SubmitButton";
+import {useSearchParams} from "next/navigation";
 
 interface EmailPopupProps {
     onSubmit: (email: string) => void;
-    imageName: string;
-    cardName: string;
-    kioskName?: string;
-    filterName?: string;
 }
 
 export default function EmailPopup({
                                        onSubmit,
-                                       imageName,
-                                       cardName,
-                                       kioskName,
-                                       filterName,
                                    }: EmailPopupProps) {
     const [email, setEmail] = useState("");
     const [prevEmail, setPrevEmail] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const searchParams = useSearchParams();
+    const imageId = searchParams.get("image");
+    const [kioskName, filterName, timestamp] = imageId ? imageId.split("_") : ["", "", ""];
     useEffect(() => {
         const storedEmail = localStorage.getItem("userEmail");
         if (storedEmail) {
@@ -50,10 +46,9 @@ export default function EmailPopup({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     email: emailToSave,
-                    image_name: imageName,
-                    card_name: cardName,
                     kiosk_name: kioskName,
                     filter_name: filterName,
+                    timestamp: timestamp,
                 }),
             });
 

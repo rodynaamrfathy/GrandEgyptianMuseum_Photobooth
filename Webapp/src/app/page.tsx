@@ -110,10 +110,6 @@ export default function Home() {
                         setUserEmail(email); // Update lifted state
                         setIsEmailEntered(true);
                     }}
-                    imageName="booth_image.png"
-                    cardName="custom_card.png"
-                    kioskName="Ramses"
-                    filterName="default"
                 />
             )}
         </div>
