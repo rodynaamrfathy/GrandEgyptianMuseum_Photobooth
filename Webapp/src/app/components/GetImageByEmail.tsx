@@ -1,38 +1,21 @@
 "use client";
 import { Mail, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {useSearchParams} from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface EmailButtonProps {
-    cardBlob: Blob;   // The generated card blob
+    cardBlob: Blob;
+    userEmail: string; // New Prop
     className?: string;
 }
 
-const EmailButton: React.FC<EmailButtonProps> = ({cardBlob, className }) => {
+const EmailButton: React.FC<EmailButtonProps> = ({ cardBlob, userEmail, className }) => {
     const { t } = useTranslation();
-    const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     const searchParams = useSearchParams();
     const imageId = searchParams.get("image");
 
-    useEffect(() => {
-        // Read initial email from localStorage
-        const savedEmail = localStorage.getItem("userEmail");
-        if (savedEmail) setUserEmail(savedEmail);
-
-        // Listen for storage changes from other components/tabs
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "userEmail" && e.newValue) {
-                setUserEmail(e.newValue);
-            }
-        };
-
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
-    }, []);
-
-    // Helper to convert Blob to Base64 for the Lambda payload
     const blobToBase64 = (blob: Blob): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -54,10 +37,8 @@ const EmailButton: React.FC<EmailButtonProps> = ({cardBlob, className }) => {
         setIsSending(true);
 
         try {
-            // 1. Convert the Card Blob to Base64
             const cardBase64 = await blobToBase64(cardBlob);
 
-            // 2. Call the Send Image Email Lambda
             const res = await fetch(process.env.NEXT_PUBLIC_SEND_IMAGE_EMAIL_URL || "", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -95,11 +76,11 @@ const EmailButton: React.FC<EmailButtonProps> = ({cardBlob, className }) => {
                 <Mail className="w-5 h-5 text-white" />
             )}
             <span className="text-white font-medium font-sans">
-        {isSending
-            ? t("share.sending")
-            : userEmail ? t("share.emailWith", { email: userEmail }) : t("share.email")
-        }
-      </span>
+                {isSending
+                    ? t("share.sending")
+                    : userEmail ? t("share.emailWith", { email: userEmail }) : t("share.email")
+                }
+            </span>
         </button>
     );
 };

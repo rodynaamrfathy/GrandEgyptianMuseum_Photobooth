@@ -24,8 +24,17 @@ export default function Home() {
     const [editText, setEditText] = useState("");
     const { customCardBlob } = useCustomCard(editText);
 
-    // Email Popup
+    // Email State (LIFTED STATE)
+    const [userEmail, setUserEmail] = useState<string>("");
     const [isEmailEntered, setIsEmailEntered] = useState(false);
+
+    // Initialize email from storage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem("userEmail");
+        if (saved) {
+            setUserEmail(saved);
+        }
+    }, []);
 
     // Set default edit text when language changes
     useEffect(() => {
@@ -40,7 +49,6 @@ export default function Home() {
         };
     }, [isEmailEntered]);
 
-    // Blob URLs
     const blobUrl = imageBlob ? URL.createObjectURL(imageBlob) : null;
     const customCardUrl = customCardBlob ? URL.createObjectURL(customCardBlob) : null;
 
@@ -72,11 +80,11 @@ export default function Home() {
                             />
                         </div>
 
-                        {/* Share & Edit Buttons */}
                         <div className="flex flex-col w-full max-w-md gap-4 mt-4 relative">
                             {imageBlob && customCardBlob && (
                                 <GetImageByEmail
                                     cardBlob={customCardBlob}
+                                    userEmail={userEmail} // Pass lifted state
                                     className="w-full"
                                 />
                             )}
@@ -96,10 +104,12 @@ export default function Home() {
             </main>
             <Footer />
 
-            {/* Email Popup */}
             {!isEmailEntered && (
                 <EmailPopup
-                    onSubmit={() => setIsEmailEntered(true)}
+                    onSubmit={(email) => {
+                        setUserEmail(email); // Update lifted state
+                        setIsEmailEntered(true);
+                    }}
                     imageName="booth_image.png"
                     cardName="custom_card.png"
                     kioskName="Ramses"
