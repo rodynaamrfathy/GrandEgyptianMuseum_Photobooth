@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 export default function Header() {
   return (
-  <header className="flex justify-between items-center p-4 bg-[#141414] top-0 z-40">
+  <header className="flex justify-between items-center p-4 bg-transparent top-0 z-40">
     <Image src="LOGO.svg" alt="GEM Logo" width={80} height={80} />
       <ChangeLanguageButton />
     </header>

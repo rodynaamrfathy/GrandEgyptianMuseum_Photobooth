@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Footer Component Snapshot should match snapshot 1`] = `
+<footer
+  class="text-[#FFFFFF] dark:text-[#FFFFFF] text-center p-4 text-[10px] bg-[#141414] dark:bg-[#141414] font-sans"
+>
+  footer.text
+   
+  <span
+    class="text-[#EE7103]"
+  >
+    footer.team
+  </span>
+</footer>
+`;

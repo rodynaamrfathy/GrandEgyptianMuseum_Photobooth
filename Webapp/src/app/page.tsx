@@ -8,7 +8,6 @@ import { useCustomCard } from "./hooks/useCustomCard";
 import { useState, useEffect } from "react";
 import EmailPopup from "./components/EmailPopup";
 import GetImageByEmail from "./components/GetImageByEmail";
-import LoopingText from "./components/LoopingText";
 import FlippableCard from "./components/FlippableCardProps";
 
 import "../lib/i18n";
@@ -53,24 +52,13 @@ export default function Home() {
     const customCardUrl = customCardBlob ? URL.createObjectURL(customCardBlob) : null;
 
     return (
-        <div className="flex flex-col min-h-screen font-cairo relative">
+        <div className="flex flex-col min-h-screen font-cairo relative bg-[url('/dark_mode_background.svg')] bg-cover bg-center">
             <Header />
             <main
                 dir={i18n.dir()}
-                className="flex flex-col flex-1 items-center justify-start bg-[url('/dark_mode_background.svg')] bg-cover bg-center pb-8"
+                className="flex flex-col flex-1 items-center justify-start pb-8"
             >
                 <div className="max-w-md flex flex-col gap-6 mt-8 mx-auto items-center justify-center">
-                    <LoopingText
-                        texts={[
-                            t("keepMemories"),
-                            t("edit.defaultText"),
-                            t("buttons.share"),
-                            t("alertPhotoBooth"),
-                        ]}
-                        interval={3000}
-                        className="text-2xl font-semibold"
-                    />
-
                     <div className="flex flex-col items-center">
                         <div className="flex flex-col items-center w-full">
                             <FlippableCard
