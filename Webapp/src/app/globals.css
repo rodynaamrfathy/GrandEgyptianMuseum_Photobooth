@@ -73,6 +73,104 @@
 }
 
 
+/* Greta Arabic Font Family */
+@font-face {
+  font-family: 'Greta Arabic';
+  src: url('/fonts/Greta Arabic/GretaArabic-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Arabic';
+  src: url('/fonts/Greta Arabic/GretaArabic-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Arabic';
+  src: url('/fonts/Greta Arabic/GretaArabic-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Arabic';
+  src: url('/fonts/Greta Arabic/GretaArabic-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Greta Sans Font Family */
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-Thin_OTF/GretaSansStd-Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-Regular_OTF/GretaSansStd-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-RegularItalic_OTF/GretaSansStd-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-Medium_OTF/GretaSansStd-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-MediumItalic_OTF/GretaSansStd-MediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-Bold_OTF/GretaSansStd-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-BoldItalic_OTF/GretaSansStd-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Greta Sans';
+  src: url('/fonts/GRETA_SANS/GretaSansStd-ThinItalic_OTF/GretaSansStd-ThinItalic.otf') format('opentype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Utility classes */
 .font-averia {
   font-family: 'Averia Libre', sans-serif;
@@ -83,11 +181,22 @@
 .font-cairo {
   font-family: 'Cairo', sans-serif;
 }
+.font-greta-arabic {
+  font-family: 'Greta Arabic', sans-serif;
+}
+.font-greta-sans {
+  font-family: 'Greta Sans', sans-serif;
+}
 
 
 /* Arabic - applied when html lang="ar" */
 html[lang="ar"] body {
-  font-family: 'Cairo', 'Cairo', 'Averia', Arial, Helvetica, sans-serif;
+  font-family: 'Greta Arabic', 'Cairo', Arial, Helvetica, sans-serif;
+}
+
+/* English and other LTR languages */
+html[lang="en"] body {
+  font-family: 'Greta Sans', 'Mariam', Arial, Helvetica, sans-serif;
 }
 
 /* English and other LTR languages */
@@ -107,7 +216,7 @@ html[lang="en"] body {
 :root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Cairo', Arial, Helvetica, sans-serif;
+  --font-sans: 'Greta Sans', Arial, Helvetica, sans-serif;
   --font-mono: monospace;
 }
 
@@ -122,5 +231,5 @@ html[lang="en"] body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Mariam','Cairo', Arial, Helvetica, sans-serif;
+  font-family: 'Greta Sans','Mariam', Arial, Helvetica, sans-serif;
 }

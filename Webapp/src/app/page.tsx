@@ -6,9 +6,12 @@ import EditButton from "./components/EditButton";
 import { useRemoteImage } from "./hooks/useRemoteImage";
 import { useCustomCard } from "./hooks/useCustomCard";
 import { useState, useEffect } from "react";
-import EmailPopup from "./components/EmailPopup";
-import GetImageByEmail from "./components/GetImageByEmail";
 import FlippableCard from "./components/FlippableCardProps";
+import DownloadButton from "./components/DownloadButton";
+
+// Send-image-by-email feature (disabled)
+// import EmailPopup from "./components/EmailPopup";
+// import GetImageByEmail from "./components/GetImageByEmail";
 
 import "../lib/i18n";
 import { useTranslation } from "react-i18next";
@@ -23,30 +26,30 @@ export default function Home() {
     const [editText, setEditText] = useState("");
     const { customCardBlob } = useCustomCard(editText);
 
-    // Email State (LIFTED STATE)
-    const [userEmail, setUserEmail] = useState<string>("");
-    const [isEmailEntered, setIsEmailEntered] = useState(false);
+    // Email State (LIFTED STATE) — disabled with send-image-by-email feature
+    // const [userEmail, setUserEmail] = useState<string>("");
+    // const [isEmailEntered, setIsEmailEntered] = useState(false);
 
-    // Initialize email from storage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem("userEmail");
-        if (saved) {
-            setUserEmail(saved);
-        }
-    }, []);
+    // Initialize email from storage on mount — disabled
+    // useEffect(() => {
+    //     const saved = localStorage.getItem("userEmail");
+    //     if (saved) {
+    //         setUserEmail(saved);
+    //     }
+    // }, []);
 
     // Set default edit text when language changes
     useEffect(() => {
         setEditText(t("edit.defaultText"));
     }, [i18n.language, t]);
 
-    // Lock scroll when email popup is open
-    useEffect(() => {
-        document.body.style.overflow = isEmailEntered ? "auto" : "hidden";
-        return () => {
-            document.body.style.overflow = "auto";
-        };
-    }, [isEmailEntered]);
+    // Lock scroll when email popup is open — disabled with email feature
+    // useEffect(() => {
+    //     document.body.style.overflow = isEmailEntered ? "auto" : "hidden";
+    //     return () => {
+    //         document.body.style.overflow = "auto";
+    //     };
+    // }, [isEmailEntered]);
 
     const blobUrl = imageBlob ? URL.createObjectURL(imageBlob) : null;
     const customCardUrl = customCardBlob ? URL.createObjectURL(customCardBlob) : null;
@@ -68,14 +71,36 @@ export default function Home() {
                             />
                         </div>
 
-                        <div className="flex flex-col w-full max-w-md gap-4 mt-4 relative">
+                        <div className="flex flex-col w-full max-w-xs gap-4 mt-4 relative">
+                            {(imageBlob || customCardBlob) && (
+                                <div className="w-full flex gap-4">
+                                    {imageBlob && (
+                                        <DownloadButton
+                                            blob={imageBlob}
+                                            fileName="GEM_Photo.jpg"
+                                            labelKey="buttons.downloadImage"
+                                            className="flex-1"
+                                        />
+                                    )}
+                                    {customCardBlob && (
+                                        <DownloadButton
+                                            blob={customCardBlob}
+                                            fileName="GEM_Custom_Card.png"
+                                            labelKey="buttons.downloadCard"
+                                            className="flex-1"
+                                        />
+                                    )}
+                                </div>
+                            )}
+                            {/* Send-image-by-email button — disabled
                             {imageBlob && customCardBlob && (
                                 <GetImageByEmail
                                     cardBlob={customCardBlob}
-                                    userEmail={userEmail} // Pass lifted state
+                                    userEmail={userEmail}
                                     className="w-full"
                                 />
                             )}
+                            */}
                             {imageBlob && customCardBlob && (
                                 <ShareButton
                                     imageUrl={URL.createObjectURL(imageBlob)}
@@ -92,14 +117,16 @@ export default function Home() {
             </main>
             <Footer />
 
+            {/* Email popup — disabled
             {!isEmailEntered && (
                 <EmailPopup
                     onSubmit={(email) => {
-                        setUserEmail(email); // Update lifted state
+                        setUserEmail(email);
                         setIsEmailEntered(true);
                     }}
                 />
             )}
+            */}
         </div>
     );
 }

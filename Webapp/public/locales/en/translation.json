@@ -27,14 +27,16 @@
     "sending": "sending ..."
   },
   "footer": {
-    "text": "THIS WEBPAGE WAS DEVELOPED BY THE",
-    "team": "GEM HACKATHON 2024 TEAM"
+    "text": "THIS EXPERIENCE IS BROUGHT BY",
+    "team": " GEM HACKATHON 2024 TEAM WINNERS"
   },
   "marquee": {
     "keepMemories": "Keep memories alive"
   },
   "buttons": {
-    "share": "Share"
+    "share": "Share",
+    "downloadImage": "Download Image",
+    "downloadCard": "Download Card"
   },
   "alertPhotoBooth": "Get via Email",
   "alerts": {

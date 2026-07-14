@@ -33,7 +33,7 @@ export const createCardWithText = (
       const dateSize = Math.floor(img.width * 0.03);
       const isArabic = /[\u0600-\u06FF]/.test(overlayText);
 
-      const mainFont = isArabic ? "ArabicCustom" : "Mariam";
+      const mainFont = isArabic ? "Greta Arabic" : "Mariam";
       const dateFont = "Averia";
 
       await document.fonts.load(`bold ${mainSize}px '${mainFont}'`);
