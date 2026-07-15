@@ -8,7 +8,6 @@ import { useFocusTrap } from "../hooks/useFocusTrap";
 import {
   MAX_TEXT_LENGTH,
   MAX_TEXT_LINES,
-  CHARS_PER_LINE,
 } from "../constants/cardText";
 
 export interface EditButtonProps {
@@ -16,8 +15,6 @@ export interface EditButtonProps {
   onSave?: (newText: string) => void;
   className?: string;
 }
-
-const LINE_BREAK_REGEX = new RegExp(`.{1,${CHARS_PER_LINE}}`, "g");
 
 const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }) => {
   const { t } = useTranslation();
@@ -41,14 +38,8 @@ const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }
   }, []);
 
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>): void => {
-    let value = e.target.value;
-
-    if (value.length > MAX_TEXT_LENGTH) {
-      value = value.slice(0, MAX_TEXT_LENGTH);
-    }
-
-    const lines = value.match(LINE_BREAK_REGEX) ?? [];
-    setText(lines.slice(0, MAX_TEXT_LINES).join("\n"));
+    const value = e.target.value.slice(0, MAX_TEXT_LENGTH);
+    setText(value);
   }, []);
 
   useFocusTrap(modalRef, isEditOpen, handleClose);

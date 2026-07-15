@@ -6,6 +6,40 @@ import {
 
 const LINE_BREAK_REGEX = new RegExp(`.{1,${CHARS_PER_LINE}}`, "g");
 
+const MAX_TEXT_WIDTH_RATIO = 0.72;
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number
+): string[] {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+      if (lines.length >= maxLines) {
+        return lines;
+      }
+    } else {
+      currentLine = testLine;
+    }
+  }
+
+  if (currentLine && lines.length < maxLines) {
+    lines.push(currentLine);
+  }
+
+  return lines.slice(0, maxLines);
+}
+
 export function createCardWithText(
   cardUrl: string,
   overlayText: string,
@@ -40,23 +74,35 @@ export function createCardWithText(
       const isArabic = /[\u0600-\u06FF]/.test(overlayText);
 
       const mainFont = isArabic ? "Greta Arabic" : "Mariam";
+      const mainWeight = isArabic ? "normal" : "bold";
       const dateFont = "Greta Sans";
 
-      await document.fonts.load(`bold ${mainSize}px '${mainFont}'`);
+      await document.fonts.load(`${mainWeight} ${mainSize}px '${mainFont}'`);
       await document.fonts.load(`bold ${dateSize}px '${dateFont}'`);
 
-      ctx.font = `bold ${mainSize}px '${mainFont}', serif`;
+      ctx.font = `${mainWeight} ${mainSize}px '${mainFont}', serif`;
       ctx.fillStyle = "#333333";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      const lines = overlayText.match(LINE_BREAK_REGEX)?.slice(0, MAX_TEXT_LINES) ?? [];
+      const maxWidth = img.width * MAX_TEXT_WIDTH_RATIO;
+      const lines = wrapText(ctx, overlayText, maxWidth, MAX_TEXT_LINES);
 
-      const baseY = img.height * 0.41;
       const lineSpacing = mainSize * 1.1;
+      const centerY = isArabic ? img.height * 0.406 : img.height * 0.41;
+
+      // Three fixed slot positions: top, middle, bottom — centered around centerY
+      const slotY: [number, number, number] = [
+        centerY - lineSpacing,
+        centerY,
+        centerY + lineSpacing,
+      ];
+
+      // Map wrapped lines onto the fixed slots, centered vertically
+      const startSlot = Math.floor((MAX_TEXT_LINES - lines.length) / 2);
 
       lines.forEach((line, index) => {
-        ctx.fillText(line, img.width / 2, baseY + index * lineSpacing);
+        ctx.fillText(line, img.width / 2, slotY[startSlot + index]);
       });
 
       ctx.font = `bold ${dateSize}px '${dateFont}', sans-serif`;
