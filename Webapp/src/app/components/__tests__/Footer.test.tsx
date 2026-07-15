@@ -63,11 +63,11 @@ describe('Footer Component', () => {
       expect(footer).toHaveClass('text-[10px]');
     });
 
-    it('should have font-sans class', () => {
+    it('should have font-greta-sans class', () => {
       render(<Footer />);
       
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('font-sans');
+      expect(footer).toHaveClass('font-greta-sans');
     });
   });
 

@@ -70,8 +70,8 @@ function EmailPopupContent({ onSubmit }: EmailPopupProps) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
-            <div className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-md shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-6 rounded-[32px] max-w-sm w-full text-white font-sans">
-                <h2 className="text-xl font-bold mb-4 text-center font-sans">
+            <div className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-md shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-6 rounded-[32px] max-w-sm w-full text-white font-greta-sans">
+                <h2 className="text-xl font-bold mb-4 text-center font-greta-sans">
                     Enter your email to view and share your images
                 </h2>
 
@@ -81,7 +81,7 @@ function EmailPopupContent({ onSubmit }: EmailPopupProps) {
                         placeholder="you@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-3 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none font-sans"
+                        className="w-full p-3 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none font-greta-sans"
                     />
 
                     {error && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -95,7 +95,7 @@ function EmailPopupContent({ onSubmit }: EmailPopupProps) {
                             <button
                                 type="button"
                                 onClick={() => saveEmail(prevEmail)}
-                                className="px-4 py-2 bg-[#E87518] text-white rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-sans"
+                                className="px-4 py-2 bg-[#E87518] text-white rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-greta-sans"
                             >
                                 Use previous email ({prevEmail})
                             </button>

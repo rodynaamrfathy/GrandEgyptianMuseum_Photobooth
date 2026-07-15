@@ -34,10 +34,10 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
       aria-label={t(labelKey)}
       className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl
                   transition-all duration-300 flex items-center justify-center
-                  space-x-3 backdrop-blur bg-white/10 border border-white/20 font-sans ${className || ""}`}
+                  space-x-3 backdrop-blur bg-white/10 border border-white/20 font-greta-sans ${className || ""}`}
     >
       <Download className="w-5 h-5 text-white" />
-      <span className="text-white font-medium font-sans">{t(labelKey)}</span>
+      <span className="text-white font-medium font-greta-sans">{t(labelKey)}</span>
     </button>
   );
 };

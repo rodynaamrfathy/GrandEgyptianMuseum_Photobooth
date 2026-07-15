@@ -38,6 +38,16 @@
     "downloadImage": "Download Image",
     "downloadCard": "Download Card"
   },
+  "loading": {
+    "title": "Loading your memories...",
+    "preparing": "Preparing your photo...",
+    "almost": "Almost there...",
+    "error": "Something went wrong while loading your photo.",
+    "retry": "Try again"
+  },
+  "header": {
+    "toggleLanguage": "Toggle language"
+  },
   "alertPhotoBooth": "Get via Email",
   "alerts": {
     "noEmail": "No email found. Please enter your email first.",

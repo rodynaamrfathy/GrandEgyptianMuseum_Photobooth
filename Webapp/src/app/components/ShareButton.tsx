@@ -52,10 +52,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({ cardBlob, imageUrl, className
       aria-label={t("share.button", "Share via Social Media")}
       className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl 
                   transition-all duration-300 flex items-center justify-center 
-                  space-x-3 backdrop-blur bg-white/10 border border-white/20 font-sans ${className || ""}`}
+                  space-x-3 backdrop-blur bg-white/10 border border-white/20 font-greta-sans ${className || ""}`}
     >
       <Share2 className="w-5 h-5 text-white" />
-      <span className="text-white font-medium font-sans">
+      <span className="text-white font-medium font-greta-sans">
         {t("share.button")}
       </span>
     </button>

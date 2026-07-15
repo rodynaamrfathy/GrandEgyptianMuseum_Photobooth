@@ -23,7 +23,7 @@ export default function SubmitButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
-      className={`px-4 py-2 bg-white text-black rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-sans disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-orange-300 ${className}`}
+      className={`px-4 py-2 bg-white text-black rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-greta-sans disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-orange-300 ${className}`}
     >
       {children}
     </button>

@@ -173,11 +173,11 @@ describe('SubmitButton Component', () => {
       expect(button).toHaveClass('transition');
     });
 
-    it('should have font-sans class', () => {
+    it('should have font-greta-sans class', () => {
       render(<SubmitButton>Button</SubmitButton>);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('font-sans');
+      expect(button).toHaveClass('font-greta-sans');
     });
   });
 

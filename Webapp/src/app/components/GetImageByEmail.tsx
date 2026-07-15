@@ -68,14 +68,14 @@ const EmailButton: React.FC<EmailButtonProps> = ({ cardBlob, userEmail, classNam
             className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl 
                   transition-all duration-300 flex items-center justify-center 
                   space-x-3 backdrop-blur bg-white/10 border border-white/20 
-                  disabled:opacity-50 disabled:cursor-not-allowed font-sans ${className || ""}`}
+                  disabled:opacity-50 disabled:cursor-not-allowed font-greta-sans ${className || ""}`}
         >
             {isSending ? (
                 <Loader2 className="w-5 h-5 text-white animate-spin" />
             ) : (
                 <Mail className="w-5 h-5 text-white" />
             )}
-            <span className="text-white font-medium font-sans">
+            <span className="text-white font-medium font-greta-sans">
                 {isSending
                     ? t("share.sending")
                     : userEmail ? t("share.emailWith", { email: userEmail }) : t("share.email")

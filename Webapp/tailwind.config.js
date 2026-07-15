@@ -3,11 +3,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        cairo: ['Cairo', 'Arial', 'Helvetica', 'sans-serif'],
-        mariam: ['Mariam', 'serif'],
-        averia: ['Averia Libre', 'sans-serif'],
-        'greta-arabic': ['Greta Arabic', 'Cairo', 'Arial', 'Helvetica', 'sans-serif'],
         'greta-sans': ['Greta Sans', 'Arial', 'Helvetica', 'sans-serif'],
+        'greta-arabic': ['Greta Arabic', 'Arial', 'Helvetica', 'sans-serif'],
+        'mariam': ['Mariam', 'serif'],
       },
       keyframes: {
         bounceSlow: {

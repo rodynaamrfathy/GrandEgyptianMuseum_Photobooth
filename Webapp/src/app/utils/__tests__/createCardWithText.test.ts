@@ -318,7 +318,7 @@ describe('createCardWithText Utility Function', () => {
       // Check if Arabic font was loaded
       const fontLoadCalls = (document.fonts.load as jest.Mock).mock.calls;
       const hasArabicFont = fontLoadCalls.some((call) => 
-        call[0].includes('ArabicCustom')
+        call[0].includes('Greta Arabic')
       );
       expect(hasArabicFont).toBe(true);
     });

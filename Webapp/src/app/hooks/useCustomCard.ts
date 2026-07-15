@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { fetchImageAsBlob } from "./useRemoteImage";
 import { createCardWithText } from "../utils/createCardWithText";
-import { formatDate } from "../utils/blob.ts";
+import { formatDate } from "../utils/blob";
 
 const cardTemplateUrl = process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL || "";
 

@@ -58,10 +58,10 @@ const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }
       <button
         onClick={handleEditClick}
         aria-label={t("edit.button")}
-        className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur bg-white/10 border border-white/20 font-sans focus:outline-none focus:ring-2 focus:ring-orange-300 ${className || ""}`}
+        className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur bg-white/10 border border-white/20 font-greta-sans focus:outline-none focus:ring-2 focus:ring-orange-300 ${className || ""}`}
       >
         <Edit className="w-5 h-5 text-white" aria-hidden="true" />
-        <span className="text-white font-medium font-sans">
+        <span className="text-white font-medium font-greta-sans">
           {t("edit.button")}
         </span>
       </button>
@@ -75,14 +75,14 @@ const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }
         >
           <div
             ref={modalRef}
-            className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-4 rounded-[32px] max-w-sm w-full text-white font-sans"
+            className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-4 rounded-[32px] max-w-sm w-full text-white font-greta-sans"
           >
-            <h3 className="font-bold mb-3 text-lg text-white text-center font-sans">
+            <h3 className="font-bold mb-3 text-lg text-white text-center font-greta-sans">
               {t("edit.title")}
             </h3>
 
             <textarea
-              className="w-full p-2 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-300 font-sans"
+              className="w-full p-2 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-300 font-greta-sans"
               rows={3}
               maxLength={MAX_TEXT_LENGTH + MAX_TEXT_LINES}
               value={text}
@@ -92,7 +92,7 @@ const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }
             />
 
             <div
-              className="text-right text-sm text-white/60 mt-1 font-sans"
+              className="text-right text-sm text-white/60 mt-1 font-greta-sans"
               aria-live="polite"
             >
               {t("edit.chars", {
@@ -105,7 +105,7 @@ const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }
               <button
                 onClick={handleClose}
                 aria-label={t("edit.cancel")}
-                className="mx-5 px-3 py-1.5 bg-white/20 border border-white/30 text-white rounded-[16px] hover:bg-white/30 transition font-sans focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="mx-5 px-3 py-1.5 bg-white/20 border border-white/30 text-white rounded-[16px] hover:bg-white/30 transition font-greta-sans focus:outline-none focus:ring-2 focus:ring-white/50"
               >
                 {t("edit.cancel")}
               </button>
