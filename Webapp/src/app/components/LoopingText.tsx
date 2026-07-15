@@ -1,32 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
-type LoopingTextProps = {
+export interface LoopingTextProps {
   texts: string[];
-  interval?: number; // total time per text
+  interval?: number;
   className?: string;
-};
+}
+
+const FADE_DURATION_MS = 300;
 
 export default function LoopingText({
   texts,
   interval = 2500,
   className = "",
-}: LoopingTextProps) {
-  const [index, setIndex] = useState(0);
-  const [fade, setFade] = useState(true);
+}: LoopingTextProps): JSX.Element {
+  const [index, setIndex] = useState<number>(0);
+  const [fade, setFade] = useState<boolean>(true);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setFade(false); // fade out
+      setFade(false);
 
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setIndex((prev) => (prev + 1) % texts.length);
-        setFade(true); // fade in
-      }, 300);
+        setFade(true);
+      }, FADE_DURATION_MS);
     }, interval);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [interval, texts.length]);
 
   const referenceText = texts.reduce(
@@ -37,11 +43,13 @@ export default function LoopingText({
   return (
     <div
       className={`relative flex justify-center items-center text-center ${className} w-full max-w-full px-2`}
+      aria-live="polite"
+      aria-atomic="true"
     >
-      {/* Invisible reference to lock dimensions */}
-      <span className="invisible">{referenceText}</span>
+      <span className="invisible" aria-hidden="true">
+        {referenceText}
+      </span>
 
-      {/* Animated visible text */}
       <span
         className={`absolute transition-all duration-300 ease-in-out break-words ${
           fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"

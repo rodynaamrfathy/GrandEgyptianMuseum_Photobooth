@@ -1,102 +1,122 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useRef, useCallback } from "react";
 import { Edit } from "lucide-react";
 import SubmitButton from "./SubmitButton";
-
 import { useTranslation } from "react-i18next";
+import { useFocusTrap } from "../hooks/useFocusTrap";
+import {
+  MAX_TEXT_LENGTH,
+  MAX_TEXT_LINES,
+  CHARS_PER_LINE,
+} from "../constants/cardText";
 
-interface EditButtonProps {
+export interface EditButtonProps {
   textToEdit: string;
   onSave?: (newText: string) => void;
   className?: string;
 }
 
-const MAX_LENGTH = 60;
-const MAX_LINES = 3;
-const CHARS_PER_LINE = 25;
+const LINE_BREAK_REGEX = new RegExp(`.{1,${CHARS_PER_LINE}}`, "g");
 
 const EditButton: React.FC<EditButtonProps> = ({ textToEdit, onSave, className }) => {
   const { t } = useTranslation();
 
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [text, setText] = useState(textToEdit);
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  const [text, setText] = useState<string>(textToEdit);
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  const handleEditClick = () => {
+  const handleEditClick = useCallback((): void => {
     setIsEditOpen(true);
-    setText(textToEdit); // restore original text when opening
-  };
+    setText(textToEdit);
+  }, [textToEdit]);
 
-  const handleEditSave = () => {
+  const handleEditSave = useCallback((): void => {
     setIsEditOpen(false);
-    if (onSave) {
-      onSave(text);
-    }
-  };
+    onSave?.(text);
+  }, [onSave, text]);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleClose = useCallback((): void => {
+    setIsEditOpen(false);
+  }, []);
+
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     let value = e.target.value;
 
-    // Restrict max length
-    if (value.length > MAX_LENGTH) {
-      value = value.slice(0, MAX_LENGTH);
+    if (value.length > MAX_TEXT_LENGTH) {
+      value = value.slice(0, MAX_TEXT_LENGTH);
     }
 
-    // Auto-break lines every 25 chars
-    const regex = new RegExp(`.{1,${CHARS_PER_LINE}}`, "g");
-    const lines = value.match(regex) || [];
+    const lines = value.match(LINE_BREAK_REGEX) ?? [];
+    setText(lines.slice(0, MAX_TEXT_LINES).join("\n"));
+  }, []);
 
-    // Enforce max lines
-    setText(lines.slice(0, MAX_LINES).join("\n"));
-  };
+  useFocusTrap(modalRef, isEditOpen, handleClose);
 
   return (
     <>
-      {/* Main button */}
       <button
         onClick={handleEditClick}
-        className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur bg-white/10 border border-white/20 font-sans ${className || ""}`}
+        aria-label={t("edit.button")}
+        className={`w-full rounded-2xl py-4 px-6 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 backdrop-blur bg-white/10 border border-white/20 font-sans focus:outline-none focus:ring-2 focus:ring-orange-300 ${className || ""}`}
       >
-        <Edit className="w-5 h-5 text-white" />
+        <Edit className="w-5 h-5 text-white" aria-hidden="true" />
         <span className="text-white font-medium font-sans">
           {t("edit.button")}
         </span>
       </button>
 
-      {/* Modal editor */}
       {isEditOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-4 rounded-[32px] max-w-sm w-full text-white font-sans">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("edit.title")}
+        >
+          <div
+            ref={modalRef}
+            className="bg-[#AFAFAF]/20 border border-white/10 backdrop-blur-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] p-4 rounded-[32px] max-w-sm w-full text-white font-sans"
+          >
             <h3 className="font-bold mb-3 text-lg text-white text-center font-sans">
               {t("edit.title")}
             </h3>
 
-            {/* Textarea */}
             <textarea
-              className="w-full p-2 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none font-sans"
+              className="w-full p-2 rounded-[16px] bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-300 font-sans"
               rows={3}
-              maxLength={MAX_LENGTH + MAX_LINES}
+              maxLength={MAX_TEXT_LENGTH + MAX_TEXT_LINES}
               value={text}
               placeholder={t("edit.placeholder")}
               onChange={handleTextChange}
+              aria-label={t("edit.placeholder")}
             />
 
-            {/* Character counter */}
-            <div className="text-right text-sm text-white/60 mt-1 font-sans">
-              {t("edit.chars", { count: text.replace(/\n/g, "").length, max: MAX_LENGTH })}
+            <div
+              className="text-right text-sm text-white/60 mt-1 font-sans"
+              aria-live="polite"
+            >
+              {t("edit.chars", {
+                count: text.replace(/\n/g, "").length,
+                max: MAX_TEXT_LENGTH,
+              })}
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-end space-x-2 mt-3">
               <button
-                onClick={() => setIsEditOpen(false)}
-                className="mx-5 px-3 py-1.5 bg-white/20 border border-white/30 text-white rounded-[16px] hover:bg-white/30 transition font-sans"
+                onClick={handleClose}
+                aria-label={t("edit.cancel")}
+                className="mx-5 px-3 py-1.5 bg-white/20 border border-white/30 text-white rounded-[16px] hover:bg-white/30 transition font-sans focus:outline-none focus:ring-2 focus:ring-white/50"
               >
-                Cancel
+                {t("edit.cancel")}
               </button>
-                <SubmitButton onClick={handleEditSave} disabled={!text.trim()} className="px-3 py-1.5">
-                  {t("edit.save")}
-                </SubmitButton>
-
+              <SubmitButton
+                onClick={handleEditSave}
+                disabled={!text.trim()}
+                className="px-3 py-1.5"
+                aria-label={t("edit.save")}
+              >
+                {t("edit.save")}
+              </SubmitButton>
             </div>
           </div>
         </div>

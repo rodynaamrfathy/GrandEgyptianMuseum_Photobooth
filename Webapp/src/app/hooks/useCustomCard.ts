@@ -1,43 +1,72 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
 import { fetchImageAsBlob } from "./useRemoteImage";
 import { createCardWithText } from "../utils/createCardWithText";
+import { formatDate } from "../utils/blob.ts";
 
 const cardTemplateUrl = process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL || "";
 
-export function useCustomCard(editText: string) {
+export interface UseCustomCardResult {
+  customCardBlob: Blob | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useCustomCard(editText: string): UseCustomCardResult {
   const [templateBlob, setTemplateBlob] = useState<Blob | null>(null);
   const [customCardBlob, setCustomCardBlob] = useState<Blob | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getCurrentDate = () => {
-    const date = new Date();
-    return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
-  };
-  const currentDate = getCurrentDate();
+  const currentDate = useMemo(() => formatDate(), []);
 
-  // Fetch template
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchImageAsBlob(cardTemplateUrl)
-      .then(setTemplateBlob)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .then((blob) => {
+        if (!cancelled) setTemplateBlob(blob);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "Failed to fetch template";
+          setError(message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Generate custom card
   useEffect(() => {
-    if (templateBlob) {
-      const templateBlobUrl = URL.createObjectURL(templateBlob);
-      createCardWithText(templateBlobUrl, editText, currentDate)
-        .then(setCustomCardBlob)
-        .catch((err) => setError(err.message));
-    }
+    if (!templateBlob) return;
+
+    let cancelled = false;
+    const templateBlobUrl = URL.createObjectURL(templateBlob);
+
+    createCardWithText(templateBlobUrl, editText, currentDate)
+      .then((blob) => {
+        if (!cancelled) setCustomCardBlob(blob);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "Failed to create card";
+          setError(message);
+        }
+      })
+      .finally(() => {
+        URL.revokeObjectURL(templateBlobUrl);
+      });
+
+    return () => {
+      cancelled = true;
+      URL.revokeObjectURL(templateBlobUrl);
+    };
   }, [templateBlob, editText, currentDate]);
 
-  return {
-    customCardBlob,
-    loading,
-    error,
-  };
+  return { customCardBlob, loading, error };
 }

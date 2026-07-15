@@ -1,11 +1,12 @@
 "use client";
 
-interface SubmitButtonProps {
+export interface SubmitButtonProps {
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
   className?: string;
   children: React.ReactNode;
+  "aria-label"?: string;
 }
 
 export default function SubmitButton({
@@ -14,13 +15,15 @@ export default function SubmitButton({
   disabled = false,
   className = "",
   children,
-}: SubmitButtonProps) {
+  "aria-label": ariaLabel,
+}: SubmitButtonProps): JSX.Element {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 bg-white text-black rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-sans disabled:opacity-40 ${className}`}
+      aria-label={ariaLabel}
+      className={`px-4 py-2 bg-white text-black rounded-[16px] hover:bg-[#E87518] hover:text-white transition font-sans disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-orange-300 ${className}`}
     >
       {children}
     </button>
