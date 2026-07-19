@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Webapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Webapp
+        run: npm ci
+
+      - name: Type check
+        working-directory: Webapp
+        run: npm run type-check
+
+      - name: Lint
+        working-directory: Webapp
+        run: npm run lint
+
+      - name: Test
+        working-directory: Webapp
+        run: npm test -- --ci --passWithNoTests
+
+      - name: Build
+        working-directory: Webapp
+        run: npm run build
+        env:
+          NEXT_PUBLIC_AWS_API_BASE_URL: https://example.com
+          NEXT_PUBLIC_CARD_TEMPLATE_URL: https://example.com/template.png
+          NEXT_PUBLIC_SAVE_EMAIL_URL: https://example.com/save-email
+          NEXT_PUBLIC_SEND_IMAGE_EMAIL_URL: https://example.com/send-email

@@ -9,12 +9,7 @@ interface DownloadButtonProps {
   className?: string;
 }
 
-const DownloadButton: React.FC<DownloadButtonProps> = ({
-  blob,
-  fileName,
-  labelKey,
-  className,
-}) => {
+const DownloadButton: React.FC<DownloadButtonProps> = ({ blob, fileName, labelKey, className }) => {
   const { t } = useTranslation();
 
   const handleDownload = () => {
@@ -36,7 +31,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({
                   transition-all duration-300 flex items-center justify-center
                   space-x-3 backdrop-blur bg-white/10 border border-white/20 font-greta-sans ${className || ""}`}
     >
-      <Download className="w-5 h-5 text-white" />
+      <Download className="w-7 h-7 text-white" />
       <span className="text-white font-medium font-greta-sans">{t(labelKey)}</span>
     </button>
   );

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header Component Snapshot should match snapshot 1`] = `
+<header
+  class="flex justify-between items-center p-4 top-0 z-40"
+>
+  <img
+    alt="GEM Logo"
+    height="80"
+    src="LOGO.svg"
+    width="80"
+  />
+  <button
+    aria-label="header.toggleLanguage"
+    class="text-xl font-bold bg-orange-500 text-white rounded-[8px] w-8 h-8 flex items-center justify-center hover:bg-orange-600 transition focus:outline-none focus:ring-2 focus:ring-orange-300"
+  >
+    ع
+  </button>
+</header>
+`;

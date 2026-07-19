@@ -1,10 +1,4 @@
-import {
-  MAX_TEXT_LENGTH,
-  MAX_TEXT_LINES,
-  CHARS_PER_LINE,
-} from "../constants/cardText";
-
-const LINE_BREAK_REGEX = new RegExp(`.{1,${CHARS_PER_LINE}}`, "g");
+import { MAX_TEXT_LENGTH, MAX_TEXT_LINES, CHARS_PER_LINE } from "../constants/cardText";
 
 const MAX_TEXT_WIDTH_RATIO = 0.72;
 
