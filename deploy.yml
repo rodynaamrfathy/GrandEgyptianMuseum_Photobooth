@@ -1,0 +1,680 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GEM Photobooth Full Stack Infrastructure with Upload, GetImage,
+  SaveEmail & SendImageEmail Lambdas
+
+# ==================================================
+# Parameters
+# ==================================================
+Parameters:
+  UploadLambdaName:
+    Type: String
+    Default: UploadImageToS3
+
+  GetImageLambdaName:
+    Type: String
+    Default: GetImageLambda
+
+  SaveEmailLambdaName:
+    Type: String
+    Default: SaveEmailLambda
+
+  SendImageEmailLambdaName:
+    Type: String
+    Default: SendImageEmailLambda
+
+  UploadLambdaRoleName:
+    Type: String
+    Default: UploadImageLambdaRole
+
+  GetImageLambdaRoleName:
+    Type: String
+    Default: GetImageLambdaRole
+
+  SaveEmailLambdaRoleName:
+    Type: String
+    Default: SaveEmailLambdaRole
+
+  SendImageEmailLambdaRoleName:
+    Type: String
+    Default: SendImageEmailLambdaRole
+
+  EmailTableName:
+    Type: String
+    Default: GEMPhotoboothEmails
+
+  SenderEmail:
+    Type: String
+    Default: no-reply@gem.com
+    Description: Verified SES sender email
+
+Resources:
+
+  # -----------------
+  # S3 Bucket
+  # -----------------
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub gem-upload-bucket-${AWS::AccountId}-${AWS::Region}-rodyna-v4
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - HEAD
+            AllowedHeaders:
+              - '*'
+
+  UploadBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UploadBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadAccess
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${UploadBucket}/*
+
+  # -----------------
+  # DynamoDB Table for Emails
+  # -----------------
+  EmailTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref EmailTableName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # -----------------
+  # Upload Lambda IAM Role
+  # -----------------
+  UploadLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref UploadLambdaRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3PutObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub arn:aws:s3:::${UploadBucket}/*
+
+  # -----------------
+  # Upload Lambda Function (Node.js)
+  # -----------------
+  UploadLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref UploadLambdaName
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt UploadLambdaRole.Arn
+      Timeout: 15
+      MemorySize: 128
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref UploadBucket
+          GET_IMAGE_API_URL: !Sub https://${PhotoboothAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/images
+      Code:
+        ZipFile: |
+          const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+
+          const s3 = new S3Client({ region: process.env.AWS_REGION });
+          const BUCKET_NAME = process.env.BUCKET_NAME;
+          const GET_IMAGE_API_URL = process.env.GET_IMAGE_API_URL.replace(/\/$/, "");
+
+          exports.handler = async (event) => {
+            try {
+              const headers = Object.fromEntries(
+                Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v])
+              );
+
+              const kioskName = headers["x-kiosk-name"];
+              const filterName = headers["x-filter-name"];
+              const timestamp = headers["x-timestamp"];
+
+              if (!kioskName || !filterName || !timestamp) {
+                return response(400, { message: "Missing required headers" });
+              }
+
+              const imageBuffer = Buffer.from(
+                event.isBase64Encoded ? event.body : Buffer.from(event.body),
+                "base64"
+              );
+
+              const id = `${kioskName}_${filterName}_${timestamp}`;
+              const key = `uploads/${kioskName}/${filterName}/${id}.png`;
+
+              await s3.send(
+                new PutObjectCommand({
+                  Bucket: BUCKET_NAME,
+                  Key: key,
+                  Body: imageBuffer,
+                  ContentType: "image/png"
+                })
+              );
+
+              return response(200, { id, image_url: `${GET_IMAGE_API_URL}/${id}` });
+            } catch (err) {
+              console.error("Error:", err);
+              return response(500, { message: "Upload failed" });
+            }
+          };
+
+          function response(statusCode, body) {
+            return {
+              statusCode,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              },
+              body: JSON.stringify(body)
+            };
+          }
+
+  # -----------------
+  # Get Image Lambda IAM Role
+  # -----------------
+  GetImageLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref GetImageLambdaRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: GetImageS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${UploadBucket}/*
+
+
+  # -----------------
+  # IAM Role for Send Email Lambda
+  # -----------------
+
+  SendImageEmailLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref SendImageEmailLambdaRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SendEmailPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendRawEmail
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${UploadBucket}/*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${UploadBucket}
+
+  # -----------------
+  # Get Image Lambda Function (Node.js)
+  # -----------------
+  GetImageLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref GetImageLambdaName
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt GetImageLambdaRole.Arn
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref UploadBucket
+      Code:
+        ZipFile: |
+          const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+          const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+          const s3 = new S3Client({ region: process.env.AWS_REGION });
+          const BUCKET = process.env.BUCKET_NAME;
+          const EXPIRE = 60 * 60 * 24 * 7; // 7 days
+
+          exports.handler = async (event) => {
+            try {
+              const id = event.pathParameters?.id;
+              if (!id) return { statusCode: 400, body: "Missing id" };
+
+              const [kioskName, filterName, timestamp] = id.split("_");
+              if (!kioskName || !filterName || !timestamp) {
+                return { statusCode: 400, body: "Invalid id" };
+              }
+
+              const key = `uploads/${kioskName}/${filterName}/${id}.png`;
+              const command = new GetObjectCommand({ Bucket: BUCKET, Key: key });
+              const url = await getSignedUrl(s3, command, { expiresIn: EXPIRE });
+
+              return {
+                statusCode: 302,
+                headers: { Location: url, "Cache-Control": "no-store" },
+                body: ""
+              };
+            } catch (err) {
+              console.error("GetImage error:", err);
+              return { statusCode: 500, body: "Internal Server Error" };
+            }
+          };
+
+  # -----------------
+  # Save Email Lambda IAM Role
+  # -----------------
+  SaveEmailLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref SaveEmailLambdaRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBPutPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !GetAtt EmailTable.Arn
+
+  # -----------------
+  # Save Email Lambda Function (Node.js)
+  # -----------------
+  SaveEmailLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref SaveEmailLambdaName
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt SaveEmailLambdaRole.Arn
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref EmailTableName
+      Code:
+        ZipFile: |
+          const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
+
+           // Pure JS UUID generator (v4)
+           function uuidv4() {
+             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+               const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+               return v.toString(16);
+             });
+           }
+
+           const client = new DynamoDBClient({ region: process.env.AWS_REGION });
+           const TABLE_NAME = process.env.TABLE_NAME;
+
+           exports.handler = async (event) => {
+             try {
+               const body = JSON.parse(event.body);
+               const { email, image_name, card_name, kiosk_name, filter_name } = body;
+
+               if (!email || !image_name || !card_name) {
+                 return response(400, { error: "Missing required fields" });
+               }
+
+               const id = uuidv4();
+
+               const item = {
+                 id: { S: id },
+                 email: { S: email },
+                 image_name: { S: image_name },
+                 card_name: { S: card_name },
+                 kiosk_name: { S: kiosk_name || "default" },
+                 filter_name: { S: filter_name || "default" },
+                 timestamp: { S: new Date().toISOString() }
+               };
+
+               await client.send(new PutItemCommand({ TableName: TABLE_NAME, Item: item }));
+
+               return response(200, { success: true, id });
+             } catch (err) {
+               console.error(err);
+               return response(500, { error: "Internal Server Error" });
+             }
+           };
+
+           function response(statusCode, body) {
+             return {
+               statusCode,
+               headers: {
+                 "Content-Type": "application/json",
+                 "Access-Control-Allow-Origin": "*"
+               },
+               body: JSON.stringify(body)
+             };
+           }
+
+  # -----------------
+  # Send Image Email Lambda
+  # -----------------
+
+  SendImageEmailLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref SendImageEmailLambdaName
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt SendImageEmailLambdaRole.Arn
+      Timeout: 20
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref UploadBucket
+          SENDER_EMAIL: !Ref SenderEmail
+          API_ID: !Ref PhotoboothAPI # Needed to construct the internal URL
+      Code:
+        ZipFile: |
+          const https = require("https");
+          const { SESClient, SendRawEmailCommand } = require("@aws-sdk/client-ses");
+          const ses = new SESClient({ region: process.env.AWS_REGION });
+
+          async function fetchImage(url) {
+            return new Promise((resolve, reject) => {
+              const request = https.get(url, (res) => {
+                if (res.statusCode === 302 && res.headers.location) {
+                  return resolve(fetchImage(res.headers.location));
+                }
+                if (res.statusCode !== 200) {
+                  return reject(new Error(`Failed to fetch image from API. Status: ${res.statusCode}`));
+                }
+                const chunks = [];
+                res.on("data", (chunk) => chunks.push(chunk));
+                res.on("end", () => resolve(Buffer.concat(chunks)));
+              });
+              request.on("error", reject);
+            });
+          }
+
+          exports.handler = async (event) => {
+            try {
+              const body = JSON.parse(event.body);
+              const { email, imageId, cardBase64, cardName } = body;
+
+              // 1. Strict Validation
+              if (!email || !imageId || !cardBase64) {
+                return response(400, { error: "Missing required fields: email, imageId, or cardBase64" });
+              }
+
+              // 2. Fetch original photo using the correct API Gateway path: /prod/images/{id}
+              const getImageUrl = `https://yxoymv39e7.execute-api.eu-north-1.amazonaws.com/GetImage/${imageId}`;
+              const imageBuffer = await fetchImage(getImageUrl);
+              const imageBase64 = imageBuffer.toString("base64");
+
+              const boundary = "GEMBoundary";
+              const rawEmail = [
+                `From: GEM Photobooth <${process.env.SENDER_EMAIL}>`,
+                `To: ${email}`,
+                `Subject: Your Photos from the Grand Egyptian Museum`,
+                `MIME-Version: 1.0`,
+                `Content-Type: multipart/mixed; boundary="${boundary}"`,
+                `\r\n--${boundary}`,
+                `Content-Type: text/plain; charset=utf-8`,
+                `\r\nThank you for visiting the Grand Egyptian Museum. Your photos are attached!`,
+                `\r\n--${boundary}`,
+                `Content-Type: image/png`,
+                `Content-Disposition: attachment; filename="photo.png"`,
+                `Content-Transfer-Encoding: base64`,
+                `\r\n${imageBase64}`,
+                `\r\n--${boundary}`,
+                `Content-Type: image/png`,
+                `Content-Disposition: attachment; filename="${cardName || 'custom_card.png'}"`,
+                `Content-Transfer-Encoding: base64`,
+                `\r\n${cardBase64}`,
+                `\r\n--${boundary}--`
+              ].join("\r\n");
+
+              await ses.send(new SendRawEmailCommand({ RawMessage: { Data: Buffer.from(rawEmail) } }));
+
+              return response(200, { success: true, message: "Email sent successfully" });
+            } catch (err) {
+              console.error("Internal Error:", err);
+              return response(500, { error: err.message });
+            }
+          };
+
+          function response(statusCode, body) {
+            return {
+              statusCode,
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
+              },
+              body: JSON.stringify(body)
+            };
+          }
+
+  # -----------------
+  # API Gateway HTTP API
+  # -----------------
+  #PhotoboothAPI:
+  #  Type: AWS::ApiGatewayV2::Api
+  #  Properties:
+  #   Name: GEMPhotoboothAPI
+  #  ProtocolType: HTTP
+
+  # -----------------
+  # API Gateway HTTP API (Updated with CORS)
+  # -----------------
+  PhotoboothAPI:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: GEMPhotoboothAPI
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - '*' # For testing; in production use your specific domain
+        AllowMethods:
+          - POST
+          - GET
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - x-kiosk-name
+          - x-filter-name
+          - x-timestamp
+        MaxAge: 300
+
+  # -----------------
+  # Integrations
+  # -----------------
+  UploadIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${UploadLambdaName}
+      PayloadFormatVersion: '2.0'
+
+  GetImageIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${GetImageLambdaName}
+      PayloadFormatVersion: '2.0'
+
+  SaveEmailIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${SaveEmailLambdaName}
+      PayloadFormatVersion: '2.0'
+
+  SendImageEmailIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${SendImageEmailLambdaName}
+      PayloadFormatVersion: '2.0'
+
+  # -----------------
+  # Routes
+  # -----------------
+  UploadRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      RouteKey: POST /upload
+      Target: !Sub integrations/${UploadIntegration}
+
+  GetImageRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      RouteKey: GET /images/{id}
+      Target: !Sub integrations/${GetImageIntegration}
+
+  SaveEmailRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      RouteKey: POST /save-email
+      Target: !Sub integrations/${SaveEmailIntegration}
+
+  SendImageEmailRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      RouteKey: POST /send-image-email
+      Target: !Sub integrations/${SendImageEmailIntegration}
+
+  # -----------------
+  # Deployment & Stage
+  # -----------------
+  APIDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+    DependsOn:
+      - UploadRoute
+      - GetImageRoute
+      - SaveEmailRoute
+      - SendImageEmailRoute
+
+  APIStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref PhotoboothAPI
+      StageName: prod
+      DeploymentId: !Ref APIDeployment
+      AutoDeploy: true
+
+  # -----------------
+  # Lambda Permissions
+  # -----------------
+  UploadLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref UploadLambda
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PhotoboothAPI}/*/POST/upload
+
+  GetImageLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetImageLambda
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PhotoboothAPI}/*/GET/images/*
+
+  SaveEmailLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SaveEmailLambda
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PhotoboothAPI}/*/POST/save-email
+  SendImageEmailLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SendImageEmailLambda
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PhotoboothAPI}/*/POST/send-image-email
+
+Outputs:
+  UploadBucketName:
+    Description: S3 bucket for uploads
+    Value: !Ref UploadBucket
+
+  UploadAPIUrl:
+    Description: API Gateway endpoint for image uploads
+    Value: !Sub https://${PhotoboothAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/upload
+
+  GetImageAPIUrl:
+    Description: API Gateway endpoint for getting images
+    Value: !Sub https://${PhotoboothAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/images
+
+  SaveEmailAPIUrl:
+    Description: API Gateway endpoint for saving emails
+    Value: !Sub https://${PhotoboothAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/save-email
+  SendImageEmailAPIUrl:
+    Description: API Gateway endpoint for sending image by email
+    Value: !Sub https://${PhotoboothAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/send-image-email
