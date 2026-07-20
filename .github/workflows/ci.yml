@@ -40,7 +40,7 @@ jobs:
         working-directory: Webapp
         run: npm run build
         env:
-          NEXT_PUBLIC_AWS_API_BASE_URL: https://example.com
+          NEXT_PUBLIC_AWS_REGION: us-east-1
+          NEXT_PUBLIC_AWS_API_BASE_URL: https://example.com/images
           NEXT_PUBLIC_CARD_TEMPLATE_URL: https://example.com/template.png
           NEXT_PUBLIC_SAVE_EMAIL_URL: https://example.com/save-email
-          NEXT_PUBLIC_SEND_IMAGE_EMAIL_URL: https://example.com/send-email

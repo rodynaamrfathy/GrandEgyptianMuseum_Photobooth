@@ -28,6 +28,7 @@ npm run dev                         # http://localhost:3000
 | Variable | Example | Notes |
 |---|---|---|
 | `NEXT_PUBLIC_AWS_API_BASE_URL` | `https://abc.execute-api.us-east-1.amazonaws.com/prod/images` | `GetImage` endpoint base (no trailing slash) |
+| `NEXT_PUBLIC_AWS_REGION` | `us-east-1` | AWS region of the API/S3. If unset, derived from `NEXT_PUBLIC_AWS_API_BASE_URL` and falls back to `us-east-1`. Used by `next.config.js` to build the CSP and `images.remotePatterns` allowlist. |
 | `NEXT_PUBLIC_CARD_TEMPLATE_URL` | `https://res.cloudinary.com/.../template.png` | PNG template for the back of the card |
 | `NEXT_PUBLIC_SAVE_EMAIL_URL` | `https://abc.execute-api.us-east-1.amazonaws.com/prod/save-email` | `SaveEmail` endpoint |
 

@@ -1,4 +1,13 @@
 /** @type {import('next').NextConfig} */
+
+// Derive the AWS region from the API base URL so the app works in any
+// region. Falls back to us-east-1 when the env var is not set, matching
+// the original hardcoded behaviour.
+const apiBaseUrl = process.env.NEXT_PUBLIC_AWS_API_BASE_URL || "";
+const regionMatch = apiBaseUrl.match(/execute-api\.([^.]+)\.amazonaws\.com/);
+const AWS_REGION =
+  process.env.NEXT_PUBLIC_AWS_REGION || (regionMatch ? regionMatch[1] : "us-east-1");
+
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
@@ -12,7 +21,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**.execute-api.us-east-1.amazonaws.com",
+        hostname: `**.execute-api.${AWS_REGION}.amazonaws.com`,
       },
     ],
   },
@@ -32,9 +41,9 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https: https://*.s3.us-east-1.amazonaws.com",
+              `img-src 'self' data: blob: https: https://*.s3.${AWS_REGION}.amazonaws.com`,
               "font-src 'self' data:",
-              "connect-src 'self' https://*.execute-api.us-east-1.amazonaws.com https://*.s3.us-east-1.amazonaws.com https://res.cloudinary.com",
+              `connect-src 'self' https://*.execute-api.${AWS_REGION}.amazonaws.com https://*.s3.${AWS_REGION}.amazonaws.com https://res.cloudinary.com`,
               "frame-ancestors 'none'",
             ].join("; "),
           },
