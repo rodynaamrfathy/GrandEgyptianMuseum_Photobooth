@@ -7,6 +7,7 @@ import EditButton from "./components/EditButton";
 import LoadingState from "./components/LoadingState";
 import FlippableCard from "./components/FlippableCardProps";
 import DownloadButton from "./components/DownloadButton";
+import EmailPopup from "./components/EmailPopup";
 import { useRemoteImage } from "./hooks/useRemoteImage";
 import { useCustomCard } from "./hooks/useCustomCard";
 import { useBlobUrl } from "./hooks/useBlobUrl";
@@ -30,30 +31,33 @@ export default function Home(): JSX.Element {
 
   const { customCardBlob, loading: cardLoading } = useCustomCard(editText);
 
+  // Email capture (gate the main UI on every visit)
+  const [isEmailEntered, setIsEmailEntered] = useState(false);
+
+  // Lock scroll while the email modal is open
+  useEffect(() => {
+    document.body.style.overflow = isEmailEntered ? "auto" : "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isEmailEntered]);
+
   const blobUrl = useBlobUrl(imageBlob);
   const customCardUrl = useBlobUrl(customCardBlob);
   const shareImageUrl = useBlobUrl(imageBlob);
 
-  const isLoading = imageLoading || cardLoading || (!imageBlob || !customCardBlob);
+  const isLoading = imageLoading || cardLoading || !imageBlob || !customCardBlob;
 
   return (
     <div className="flex flex-col min-h-screen font-greta-sans relative bg-[url('/dark_mode_background.svg')] bg-cover bg-center">
       <Header />
-      <main
-        dir={i18n.dir()}
-        className="flex flex-col flex-1 items-center justify-start pb-8"
-      >
+      <main dir={i18n.dir()} className="flex flex-col flex-1 items-center justify-start pb-8">
         <div className="max-w-md flex flex-col gap-6 mt-8 mx-auto items-center justify-center w-full px-4">
           {isLoading && !imageError ? (
             <LoadingState />
           ) : imageError ? (
-            <div
-              className="flex flex-col items-center justify-center gap-4 py-12"
-              role="alert"
-            >
-              <p className="text-white text-lg text-center">
-                {t("loading.error")}
-              </p>
+            <div className="flex flex-col items-center justify-center gap-4 py-12" role="alert">
+              <p className="text-white text-lg text-center">{t("loading.error")}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 bg-[#E87518] text-white rounded-[16px] hover:bg-[#c5610f] transition font-greta-sans focus:outline-none focus:ring-2 focus:ring-orange-300"
@@ -89,21 +93,17 @@ export default function Home(): JSX.Element {
                   </div>
                 )}
                 {imageBlob && customCardBlob && shareImageUrl && (
-                  <ShareButton
-                    imageUrl={shareImageUrl}
-                    cardBlob={customCardBlob}
-                  />
+                  <ShareButton imageUrl={shareImageUrl} cardBlob={customCardBlob} />
                 )}
-                <EditButton
-                  textToEdit={editText}
-                  onSave={(newText) => setEditText(newText)}
-                />
+                <EditButton textToEdit={editText} onSave={(newText) => setEditText(newText)} />
               </div>
             </>
           )}
         </div>
       </main>
       <Footer />
+
+      {!isEmailEntered && <EmailPopup onSubmit={() => setIsEmailEntered(true)} />}
     </div>
   );
 }
