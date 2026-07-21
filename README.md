@@ -211,6 +211,13 @@ linked via `Webapp/.vercel/project.json`.
 - **Static assets:** Cloudinary (card template).
 - **CI/CD:** GitHub Actions runs CI on every push; PRs get a Vercel preview. Frontend is deployed to production manually via `aws s3 sync` + CloudFront invalidation.
 
+## Cost estimate
+
+See `.aws/COST.md` for a monthly breakdown at 200K users, scaling projections,
+optimization levers, and a comparison with Vercel/EC2/Firebase/Cloudflare.
+
+**TL;DR:** ~$119/month for 200K users, dominated by CloudFront data transfer (71%) and S3 storage (23%).
+
 ## Removed / historical
 
 - `SendImageEmail` Lambda and `GetImageByEmail` button were removed in v2.2
