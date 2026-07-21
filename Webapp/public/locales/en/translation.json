@@ -1,5 +1,5 @@
 {
-  "keepMemories": "Keep memories alive", 
+  "keepMemories": "Keep memories alive",
   "edit": {
     "button": "Customize Your Card",
     "title": "Customize Your Card",
@@ -54,5 +54,16 @@
     "saveSuccess": "📧 Email {{email}} Sent",
     "saveError": "Failed to save email.",
     "prepareError": "Error preparing email."
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "This memory is missing",
+    "message": "The page you are looking for does not exist. The photo you were viewing may have expired or the link is broken.",
+    "back": "Back to start"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
   }
 }
