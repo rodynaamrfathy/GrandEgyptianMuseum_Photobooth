@@ -144,22 +144,26 @@ The script:
 
 `.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch.
 
-Required GitHub repository secrets:
+The Vercel project is `gemui` (`prj_eBGNTjXYJsnExKKgLuI3qXzZQOGs`), already linked via `Webapp/.vercel/project.json`.
+
+Required GitHub repository **secrets** (Settings → Secrets and variables → Actions):
 
 | Secret | Description |
 |---|---|
-| `VERCEL_TOKEN` | Vercel personal access token |
-| `VERCEL_ORG_ID` | Vercel team/org ID |
-| `VERCEL_PROJECT_ID` | Vercel project ID |
+| `VERCEL_TOKEN` | Vercel personal access token (Account Settings → Tokens) |
+| `VERCEL_ORG_ID` | Vercel team/org ID (Project Settings → General) |
+| `VERCEL_PROJECT_ID` | Vercel project ID (Project Settings → General) |
 
-Required GitHub repository variables (these are public, prefixed `NEXT_PUBLIC_`):
+Required GitHub repository **variables** (Settings → Secrets and variables → Actions → Variables). These are public-safe since they're prefixed `NEXT_PUBLIC_`:
 
-| Variable | Description |
+| Variable | Example value |
 |---|---|
-| `NEXT_PUBLIC_AWS_REGION` | e.g. `us-east-1` |
-| `NEXT_PUBLIC_AWS_API_BASE_URL` | e.g. `https://abc.execute-api.us-east-1.amazonaws.com/prod/images` |
+| `NEXT_PUBLIC_AWS_REGION` | `us-east-1` |
+| `NEXT_PUBLIC_AWS_API_BASE_URL` | `https://abc.execute-api.us-east-1.amazonaws.com/prod/images` |
 | `NEXT_PUBLIC_CARD_TEMPLATE_URL` | Cloudinary URL of the card template |
 | `NEXT_PUBLIC_SAVE_EMAIL_URL` | `SaveEmail` endpoint |
+
+**Important:** keep Vercel Project Settings → Environments empty for these `NEXT_PUBLIC_*` variables. The build is wired to inject them from GitHub, and duplicating them in Vercel risks the two sources drifting.
 
 ## User flow
 

@@ -1,5 +1,10 @@
 name: Deploy to Vercel
 
+# Single source of truth for the deploy is GitHub repo variables
+# (NEXT_PUBLIC_AWS_*) plus secrets (VERCEL_*). Vercel Project Settings →
+# Environments should stay empty for NEXT_PUBLIC_* so the two systems
+# do not drift.
+
 on:
   push:
     branches: [main]
@@ -27,9 +32,9 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Pull Vercel project info
+      - name: Link Vercel project
         working-directory: Webapp
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
