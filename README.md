@@ -17,10 +17,10 @@ is captured for follow-up marketing.
 │   ├── .env.local.example               # Template for the env file (copy → .env.local)
 │   └── public/                          # Static assets (fonts, backgrounds, logos)
 ├── .aws/cloudformation/
-│   └── gem-photobooth.yml               # Backend stack: S3, Lambdas, API Gateway, DynamoDB, alarms
+│   └── gem-photobooth.yml               # Backend stack: S3, Lambdas, API Gateway, DynamoDB, alarms, CloudFront
 ├── .github/workflows/
 │   ├── ci.yml                           # Type-check, lint, test, build on every push
-│   └── deploy.yml                       # Deploy to Vercel on push to main
+│   └── deploy.yml                       # Vercel preview deploys on PRs
 └── README.md
 ```
 
@@ -93,7 +93,6 @@ aws cloudformation deploy \
 | `FrontendBucketName` | S3 bucket for the exported static site (private, CloudFront-fronted) |
 | `CloudFrontDomain` | Public URL of the static site, e.g. `d111.cloudfront.net` |
 | `CloudFrontDistributionId` | Distribution ID (used to issue cache invalidations from CI) |
-| `GitHubActionsRoleArn` | ARN of the OIDC role to put in the `AWS_DEPLOY_ROLE_ARN` GitHub secret |
 
 ### CloudWatch alarms (created automatically)
 
@@ -151,44 +150,41 @@ that runs the backend also provisions the static-site bucket, the
 Origin Access Control, the distribution, and the security-headers
 policy. Vercel is only used for local previews and PR previews.
 
-`.github/workflows/deploy-frontend.yml` runs on every push to `main` and
-on manual dispatch. It:
+There is **no automated deploy**. The workflow below is run by hand
+after a release. See "Manual frontend deploy" below.
 
-1. Runs type-check, lint, test.
-2. Builds with `next build` (which emits `out/` because `next.config.js`
-   has `output: 'export'`).
-3. Assumes the deploy IAM role and syncs `out/` to the S3 bucket.
-4. Issues a CloudFront cache invalidation for `/*`.
+### Manual frontend deploy
 
-### GitHub repository secrets
+After the stack is up, deploy a new build with:
 
-| Secret | Description |
-|---|---|
-| `VERCEL_TOKEN` | Vercel token (used by `deploy.yml` for PR previews) |
-| `VERCEL_ORG_ID` | Vercel team/org ID |
-| `VERCEL_PROJECT_ID` | Vercel project ID |
-| `AWS_DEPLOY_ROLE_ARN` | The `GitHubActionsRoleArn` stack output. GitHub Actions assumes this via OIDC — no long-lived AWS keys involved. |
+```bash
+cd Webapp
+npm ci
+NEXT_PUBLIC_AWS_API_BASE_URL=https://abc.execute-api.us-east-1.amazonaws.com/prod/images \
+  NEXT_PUBLIC_AWS_REGION=us-east-1 \
+  NEXT_PUBLIC_CARD_TEMPLATE_URL=https://res.cloudinary.com/.../template.png \
+  NEXT_PUBLIC_SAVE_EMAIL_URL=https://abc.execute-api.us-east-1.amazonaws.com/prod/save-email \
+  npm run build
+# out/ is now ready
 
-### GitHub repository variables
+BUCKET=$(aws cloudformation describe-stacks --stack-name gem-photobooth \
+  --query 'Stacks[0].Outputs[?OutputKey==`FrontendBucketName`].OutputValue' --output text)
+DIST_ID=$(aws cloudformation describe-stacks --stack-name gem-photobooth \
+  --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' --output text)
 
-| Variable | Example | Notes |
-|---|---|---|
-| `NEXT_PUBLIC_AWS_REGION` | `us-east-1` | Inlined into the static bundle at build time |
-| `NEXT_PUBLIC_AWS_API_BASE_URL` | `https://abc.execute-api.us-east-1.amazonaws.com/prod/images` | Same |
-| `NEXT_PUBLIC_CARD_TEMPLATE_URL` | `https://res.cloudinary.com/.../template.png` | Same |
-| `NEXT_PUBLIC_SAVE_EMAIL_URL` | `https://abc.execute-api.us-east-1.amazonaws.com/prod/save-email` | Same |
-| `AWS_REGION` | `us-east-1` | Region the deploy runs in (where the stack lives) |
-| `STACK_NAME` | `gem-photobooth` | CFN stack name to look up outputs from |
+aws s3 sync out/ s3://$BUCKET/ --delete
+aws cloudfront create-invalidation --distribution-id $DIST_ID --paths "/*"
+```
 
+The site is then live at the `CloudFrontDomain` stack output. Cache
+invalidation takes ~30 seconds to propagate.
+
+### Vercel previews (optional)
+
+`deploy.yml` runs on PRs and deploys a preview to Vercel. Required
+GitHub secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 The Vercel project is `gemui` (`prj_eBGNTjXYJsnExKKgLuI3qXzZQOGs`),
-already linked via `Webapp/.vercel/project.json`. Keep Vercel Project
-Settings → Environments empty for `NEXT_PUBLIC_*` to avoid drift.
-
-### First-time setup
-
-After running `aws cloudformation deploy` for the stack, the
-`CloudFrontDomain` output gives you the public URL, e.g.
-`https://d111111abcdef8.cloudfront.net`. Use that as the production URL.
+linked via `Webapp/.vercel/project.json`.
 
 ## User flow
 
@@ -213,7 +209,7 @@ After running `aws cloudformation deploy` for the stack, the
 - **Hosting:** S3 (private) + CloudFront with OAC, custom security-headers policy.
 - **Backend:** API Gateway HTTP API, Lambda (Node 20), S3, DynamoDB (on-demand), CloudWatch.
 - **Static assets:** Cloudinary (card template).
-- **CI/CD:** GitHub Actions → S3 + CloudFront invalidation (prod), Vercel (previews).
+- **CI/CD:** GitHub Actions runs CI on every push; PRs get a Vercel preview. Frontend is deployed to production manually via `aws s3 sync` + CloudFront invalidation.
 
 ## Removed / historical
 
