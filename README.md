@@ -74,7 +74,7 @@ aws cloudformation deploy \
 | `BucketNamePrefix` | `rodyna-v4` | Prefix for the S3 bucket name; account/region/stack suffix is appended for uniqueness |
 | `EmailRetentionDays` | _(removed)_ | _Email records are kept indefinitely; remove rows manually or add a TTL if you need rotation._ |
 | `AccessLogRetentionDays` | `30` | CloudWatch retention for API access logs |
-| `LambdaReservedConcurrency` | `5` | Per-Lambda concurrency cap (protects account-wide limit) |
+| _(removed)_ | _Per-Lambda reserved concurrency is no longer set. Lambdas share the account-wide 1,000-concurrency limit. To re-enable per-Lambda caps, add `ReservedConcurrentExecutions: N` to each Lambda and pass `LambdaReservedConcurrency` as a parameter._ |
 | `AlarmEmail` | `""` | Email that receives alarm notifications. Empty = no subscription, alarms still trigger in console |
 | `KioskRoleName` | `KioskUploadRole` | IAM role the kiosk assumes |
 | `KioskTrustedAccountArns` | `""` | Comma-separated account ARNs allowed to assume the role. **Must be set** for the role to be created |
