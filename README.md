@@ -39,7 +39,7 @@ npm run dev                              # http://localhost:3000
 |---|---|---|---|
 | `NEXT_PUBLIC_AWS_API_BASE_URL` | ✅ | `https://abc.execute-api.us-east-1.amazonaws.com/prod/images` | `GetImage` endpoint base (no trailing slash) |
 | `NEXT_PUBLIC_AWS_REGION` | ❌ | `us-east-1` | Used by `next.config.js` for CSP and `images.remotePatterns`. Auto-derived from the API URL if unset, falls back to `us-east-1`. |
-| `NEXT_PUBLIC_CARD_TEMPLATE_URL` | ✅ | `https://res.cloudinary.com/.../template.png` | PNG template for the back of the card |
+| `NEXT_PUBLIC_CARD_TEMPLATE_URL` | ❌ | `https://res.cloudinary.com/.../template.png` | Optional override for the card template. If unset, the bundled `Webapp/public/card.svg` is used (same-origin, no CORS). |
 | `NEXT_PUBLIC_SAVE_EMAIL_URL` | ✅ | `https://abc.execute-api.us-east-1.amazonaws.com/prod/save-email` | `SaveEmail` endpoint |
 
 ### Quality gates
@@ -162,7 +162,6 @@ cd Webapp
 npm ci
 NEXT_PUBLIC_AWS_API_BASE_URL=https://abc.execute-api.us-east-1.amazonaws.com/prod/images \
   NEXT_PUBLIC_AWS_REGION=us-east-1 \
-  NEXT_PUBLIC_CARD_TEMPLATE_URL=https://res.cloudinary.com/.../template.png \
   NEXT_PUBLIC_SAVE_EMAIL_URL=https://abc.execute-api.us-east-1.amazonaws.com/prod/save-email \
   npm run build
 # out/ is now ready

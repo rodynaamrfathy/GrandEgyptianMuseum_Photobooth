@@ -5,7 +5,16 @@ import { fetchImageAsBlob } from "./useRemoteImage";
 import { createCardWithText } from "../utils/createCardWithText";
 import { formatDate } from "../utils/blob";
 
-const cardTemplateUrl = process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL || "";
+// The card template ships in Webapp/public/card.svg so it deploys with the
+// static bundle (served by CloudFront). To override at runtime, set
+// NEXT_PUBLIC_CARD_TEMPLATE_URL to an absolute image URL.
+//
+// Resolved per-render (not cached at module load) so tests can flip the
+// env var and get a fresh value.
+const DEFAULT_CARD_TEMPLATE = "/card.svg";
+function getCardTemplateUrl(): string {
+  return process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL || DEFAULT_CARD_TEMPLATE;
+}
 
 export interface UseCustomCardResult {
   customCardBlob: Blob | null;
@@ -24,7 +33,7 @@ export function useCustomCard(editText: string): UseCustomCardResult {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchImageAsBlob(cardTemplateUrl)
+    fetchImageAsBlob(getCardTemplateUrl())
       .then((blob) => {
         if (!cancelled) setTemplateBlob(blob);
       })

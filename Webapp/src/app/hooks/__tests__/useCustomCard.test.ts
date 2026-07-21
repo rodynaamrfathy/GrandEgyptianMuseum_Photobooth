@@ -45,6 +45,15 @@ describe("useCustomCard Hook", () => {
     });
   });
 
+  describe("Default template", () => {
+    it("should fetch /card.svg when NEXT_PUBLIC_CARD_TEMPLATE_URL is unset", () => {
+      delete process.env.NEXT_PUBLIC_CARD_TEMPLATE_URL;
+      mockFetchImageAsBlob.mockResolvedValue(mockTemplateBlob);
+      renderHook(() => useCustomCard("Test"));
+      expect(mockFetchImageAsBlob).toHaveBeenCalledWith("/card.svg");
+    });
+  });
+
   describe("Successful Card Generation", () => {
     it("should fetch template and generate custom card", async () => {
       mockFetchImageAsBlob.mockResolvedValue(mockTemplateBlob);
