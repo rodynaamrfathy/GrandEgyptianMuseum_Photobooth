@@ -72,7 +72,7 @@ aws cloudformation deploy \
 | Parameter | Default | Notes |
 |---|---|---|
 | `BucketNamePrefix` | `rodyna-v4` | Prefix for the S3 bucket name; account/region/stack suffix is appended for uniqueness |
-| `EmailRetentionDays` | `90` | DynamoDB TTL for the email table |
+| `EmailRetentionDays` | _(removed)_ | _Email records are kept indefinitely; remove rows manually or add a TTL if you need rotation._ |
 | `AccessLogRetentionDays` | `30` | CloudWatch retention for API access logs |
 | `LambdaReservedConcurrency` | `5` | Per-Lambda concurrency cap (protects account-wide limit) |
 | `AlarmEmail` | `""` | Email that receives alarm notifications. Empty = no subscription, alarms still trigger in console |
@@ -200,7 +200,7 @@ linked via `Webapp/.vercel/project.json`.
 6. An `EmailPopup` modal blocks first paint on every visit. The visitor
    enters an email; the previous email (if any) is offered as a one-tap
    button. The submission goes to `POST /save-email` which writes to
-   DynamoDB with a 90-day TTL.
+   DynamoDB (no TTL; rows accumulate).
 
 ## Tech stack
 

@@ -29,16 +29,16 @@ Region: `us-east-1`. Currency: USD.
 | S3 (UploadBucket) | **$28.76** | Storage: $27.60 · PUT: $1.00 · GET: $0.16 |
 | Lambda | **$0.53** | Invocations: $0.00 (under 1M free) · Compute: $0.53 |
 | API Gateway HTTP API | **$0.56** | 560K requests × $1/M |
-| DynamoDB (on-demand) | **$0.23** | Writes: $0.20 · Storage: $0.03 |
+| DynamoDB (on-demand) | **$1.43** | Writes: $0.20 · Storage: $1.23 |
 | CloudFront | **$87.40** | Requests: $2.40 · Data transfer: $85.00 |
 | CloudWatch + SNS | **$1.53** | Logs: $1.03 · Alarms: $0.50 · SNS: $0.00 |
-| **Total** | **$119.01** | |
+| **Total** | **$120.21** | |
 
 | Metric | Value |
 |---|---:|
 | Per user | $0.0006 |
 | Per 1,000 users | $0.60 |
-| Annual run rate | $1,430 |
+| Annual run rate | $1,443 |
 
 ## Where the money goes
 
@@ -68,6 +68,8 @@ This is intentional: the static web app is global and benefits from edge caching
 | 2,000,000 | ~$1,200 | CloudFront data transfer dominates |
 
 At every scale, **CloudFront data transfer is the largest line item**.
+
+> **Note on DynamoDB growth:** The `EmailTable` has no TTL, so email records accumulate indefinitely. At 160K writes/month and ~200 bytes per item, storage grows by ~30 GB/year. At 5 years that's ~150 GB, costing ~$38/month. Consider re-enabling a TTL or archiving old rows to S3 Glacier if retention is a concern.
 
 ## Cost-reduction levers (ranked by ROI)
 
