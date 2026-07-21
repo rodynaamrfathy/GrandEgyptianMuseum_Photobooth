@@ -93,6 +93,7 @@ aws cloudformation deploy \
 | `FrontendBucketName` | S3 bucket for the exported static site (private, CloudFront-fronted) |
 | `CloudFrontDomain` | Public URL of the static site, e.g. `d111.cloudfront.net` |
 | `CloudFrontDistributionId` | Distribution ID (used to issue cache invalidations from CI) |
+| `GitHubActionsRoleArn` | ARN of the OIDC role to put in the `AWS_DEPLOY_ROLE_ARN` GitHub secret |
 
 ### CloudWatch alarms (created automatically)
 
@@ -166,7 +167,7 @@ on manual dispatch. It:
 | `VERCEL_TOKEN` | Vercel token (used by `deploy.yml` for PR previews) |
 | `VERCEL_ORG_ID` | Vercel team/org ID |
 | `VERCEL_PROJECT_ID` | Vercel project ID |
-| `AWS_DEPLOY_ROLE_ARN` | IAM role ARN that GitHub Actions assumes to call `s3 sync` and `cloudfront create-invalidation`. Trust policy must allow `token.actions.githubusercontent.com`. |
+| `AWS_DEPLOY_ROLE_ARN` | The `GitHubActionsRoleArn` stack output. GitHub Actions assumes this via OIDC — no long-lived AWS keys involved. |
 
 ### GitHub repository variables
 
