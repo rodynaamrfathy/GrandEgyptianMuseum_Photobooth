@@ -218,6 +218,12 @@ optimization levers, and a comparison with Vercel/EC2/Firebase/Cloudflare.
 
 **TL;DR:** ~$119/month for 200K users, dominated by CloudFront data transfer (71%) and S3 storage (23%).
 
+## Operations runbook
+
+See `.aws/CLOUDWATCH.md` for an IT-friendly explainer of the CloudWatch logs,
+metrics, and alarms this stack creates, plus common operations (finding logs,
+investigating an alarm, changing the alert email, testing an alarm).
+
 ## Removed / historical
 
 - `SendImageEmail` Lambda and `GetImageByEmail` button were removed in v2.2
