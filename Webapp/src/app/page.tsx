@@ -49,7 +49,7 @@ export default function Home(): JSX.Element {
   const isLoading = imageLoading || cardLoading || !imageBlob || !customCardBlob;
 
   return (
-    <div className="flex flex-col min-h-screen font-greta-sans relative bg-[url('/dark_mode_background.svg')] bg-cover bg-center">
+    <div className="flex flex-col min-h-screen font-greta-sans relative app-bg-dark">
       <Header />
       <main dir={i18n.dir()} className="flex flex-col flex-1 items-center justify-start pb-8">
         <div className="max-w-md flex flex-col gap-6 mt-8 mx-auto items-center justify-center w-full px-4">

@@ -6,32 +6,32 @@
 
 /* Greta Arabic — for Arabic UI text */
 @font-face {
-  font-family: 'Greta Arabic';
-  src: url('/fonts/Greta Arabic/GretaArabic-Regular.otf') format('opentype');
+  font-family: "Greta Arabic";
+  src: url("/fonts/Greta Arabic/GretaArabic-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Arabic';
-  src: url('/fonts/Greta Arabic/GretaArabic-Medium.otf') format('opentype');
+  font-family: "Greta Arabic";
+  src: url("/fonts/Greta Arabic/GretaArabic-Medium.otf") format("opentype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Arabic';
-  src: url('/fonts/Greta Arabic/GretaArabic-Bold.otf') format('opentype');
+  font-family: "Greta Arabic";
+  src: url("/fonts/Greta Arabic/GretaArabic-Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Arabic';
-  src: url('/fonts/Greta Arabic/GretaArabic-Light.otf') format('opentype');
+  font-family: "Greta Arabic";
+  src: url("/fonts/Greta Arabic/GretaArabic-Light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -39,32 +39,32 @@
 
 /* Greta Sans — for English UI text */
 @font-face {
-  font-family: 'Greta Sans';
-  src: url('/fonts/GRETA_SANS/GretaSansStd-Regular_OTF/GretaSansStd-Regular.otf') format('opentype');
+  font-family: "Greta Sans";
+  src: url("/fonts/GRETA_SANS/GretaSansStd-Regular_OTF/GretaSansStd-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Sans';
-  src: url('/fonts/GRETA_SANS/GretaSansStd-Medium_OTF/GretaSansStd-Medium.otf') format('opentype');
+  font-family: "Greta Sans";
+  src: url("/fonts/GRETA_SANS/GretaSansStd-Medium_OTF/GretaSansStd-Medium.otf") format("opentype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Sans';
-  src: url('/fonts/GRETA_SANS/GretaSansStd-Bold_OTF/GretaSansStd-Bold.otf') format('opentype');
+  font-family: "Greta Sans";
+  src: url("/fonts/GRETA_SANS/GretaSansStd-Bold_OTF/GretaSansStd-Bold.otf") format("opentype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Greta Sans';
-  src: url('/fonts/GRETA_SANS/GretaSansStd-Thin_OTF/GretaSansStd-Thin.otf') format('opentype');
+  font-family: "Greta Sans";
+  src: url("/fonts/GRETA_SANS/GretaSansStd-Thin_OTF/GretaSansStd-Thin.otf") format("opentype");
   font-weight: 100;
   font-style: normal;
   font-display: swap;
@@ -72,8 +72,8 @@
 
 /* Mariam — for card canvas text (English only) */
 @font-face {
-  font-family: 'Mariam';
-  src: url('/fonts/Mariam-Regular.otf') format('opentype');
+  font-family: "Mariam";
+  src: url("/fonts/Mariam-Regular.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -83,13 +83,13 @@
    Utility classes
 ------------------------- */
 .font-greta-arabic {
-  font-family: 'Greta Arabic', sans-serif;
+  font-family: "Greta Arabic", sans-serif;
 }
 .font-greta-sans {
-  font-family: 'Greta Sans', sans-serif;
+  font-family: "Greta Sans", sans-serif;
 }
 .font-mariam {
-  font-family: 'Mariam', serif;
+  font-family: "Mariam", serif;
 }
 
 /* ------------------------
@@ -98,17 +98,17 @@
 
 /* Arabic */
 html[lang="ar"] body {
-  font-family: 'Greta Arabic', sans-serif;
+  font-family: "Greta Arabic", sans-serif;
 }
 
 /* English and other LTR languages */
 html[lang="en"] body {
-  font-family: 'Greta Sans', sans-serif;
+  font-family: "Greta Sans", sans-serif;
 }
 
 /* Default fallback */
 body {
-  font-family: 'Greta Sans', 'Greta Arabic', sans-serif;
+  font-family: "Greta Sans", "Greta Arabic", sans-serif;
 }
 
 /* ------------------------
@@ -123,7 +123,7 @@ body {
 :root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Greta Sans', sans-serif;
+  --font-sans: "Greta Sans", sans-serif;
   --font-mono: monospace;
 }
 
@@ -137,6 +137,15 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* App background image. Defined here (not as a Tailwind arbitrary
+ * value) because Tailwind v4 escapes apostrophes in url() values as
+ * "#x27;", which trips up the production CSS loader on Vercel. */
+.app-bg-dark {
+  background-image: url("/dark_mode_background.svg");
+  background-size: cover;
+  background-position: center;
 }
 
 /* ------------------------
@@ -175,7 +184,7 @@ body {
   top: 1rem;
   z-index: 9999;
   padding: 0.5rem 1rem;
-  background: #E87518;
+  background: #e87518;
   color: white;
   border-radius: 0.5rem;
   text-decoration: none;
