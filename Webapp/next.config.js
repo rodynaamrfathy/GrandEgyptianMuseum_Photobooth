@@ -9,11 +9,13 @@ const AWS_REGION =
   process.env.NEXT_PUBLIC_AWS_REGION || (regionMatch ? regionMatch[1] : "us-east-1");
 
 const nextConfig = {
-  reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // Static export: produces an `out/` directory that can be served from
+  // any static host (S3 + CloudFront, in our case). No Node.js server.
+  output: "export",
+  // next/image optimization requires a Node server. Under static export
+  // we use plain <img> tags.
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -24,6 +26,14 @@ const nextConfig = {
         hostname: `**.execute-api.${AWS_REGION}.amazonaws.com`,
       },
     ],
+  },
+  // Append a trailing slash to all routes so the CloudFront SPA
+  // fallback (which rewrites 403/404 to /index.html) works for any
+  // future nested route without per-route config.
+  trailingSlash: true,
+  reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: false,
   },
   async headers() {
     return [
