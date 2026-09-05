@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# dependencies (catches any nested node_modules, e.g. Webapp/scripts/node_modules)
+node_modules/
+
+# editor
+.vscode/
+.idea/

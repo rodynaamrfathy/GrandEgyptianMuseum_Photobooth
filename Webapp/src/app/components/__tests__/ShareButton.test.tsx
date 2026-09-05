@@ -17,17 +17,10 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("ShareButton Component", () => {
-  const mockImageUrl = "https://example.com/image.jpg";
+  const mockImageBlob = new Blob(["image data"], { type: "image/jpeg" });
   const mockCardBlob = new Blob(["card data"], { type: "image/png" });
 
   beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        blob: () => Promise.resolve(new Blob(["image data"], { type: "image/jpeg" })),
-      })
-    ) as jest.Mock;
-
     Object.defineProperty(navigator, "canShare", { writable: true, value: jest.fn() });
     Object.defineProperty(navigator, "share", { writable: true, value: jest.fn() });
     global.window.open = jest.fn();
@@ -42,17 +35,17 @@ describe("ShareButton Component", () => {
 
   describe("Rendering", () => {
     it("should render the share button", () => {
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
     it("should display share icon", () => {
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       expect(screen.getByTestId("share2-icon")).toBeInTheDocument();
     });
 
     it("should have aria-label", () => {
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       expect(screen.getByRole("button")).toHaveAttribute("aria-label");
     });
   });
@@ -62,11 +55,10 @@ describe("ShareButton Component", () => {
       (navigator.canShare as jest.Mock).mockReturnValue(true);
       (navigator.share as jest.Mock).mockResolvedValue(undefined);
 
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(mockImageUrl);
         expect(navigator.share).toHaveBeenCalled();
       });
     });
@@ -75,7 +67,7 @@ describe("ShareButton Component", () => {
       (navigator.canShare as jest.Mock).mockReturnValue(true);
       (navigator.share as jest.Mock).mockResolvedValue(undefined);
 
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
@@ -84,13 +76,28 @@ describe("ShareButton Component", () => {
         );
       });
     });
+
+    it("should not alert when user cancels the share sheet (AbortError)", async () => {
+      (navigator.canShare as jest.Mock).mockReturnValue(true);
+      (navigator.share as jest.Mock).mockRejectedValue(
+        new DOMException("User cancelled", "AbortError")
+      );
+
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
+      fireEvent.click(screen.getByRole("button"));
+
+      await waitFor(() => {
+        expect(navigator.share).toHaveBeenCalled();
+        expect(global.alert).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe("Fallback Mechanism", () => {
     it("should use fallback when canShare returns false", async () => {
       (navigator.canShare as jest.Mock).mockReturnValue(false);
 
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
@@ -101,7 +108,7 @@ describe("ShareButton Component", () => {
     it("should use fallback when canShare is not supported", async () => {
       (navigator as unknown as { canShare: undefined }).canShare = undefined;
 
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
@@ -111,25 +118,15 @@ describe("ShareButton Component", () => {
   });
 
   describe("Error Handling", () => {
-    it("should handle fetch error gracefully", async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network error"));
+    it("should alert on share API rejection (non-cancel)", async () => {
+      (navigator.canShare as jest.Mock).mockReturnValue(true);
+      (navigator.share as jest.Mock).mockRejectedValue(new Error("Share failed"));
 
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
         expect(global.alert).toHaveBeenCalled();
-      });
-    });
-
-    it("should handle share API rejection", async () => {
-      (navigator.canShare as jest.Mock).mockReturnValue(true);
-      (navigator.share as jest.Mock).mockRejectedValue(new Error("Share failed"));
-
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
-      fireEvent.click(screen.getByRole("button"));
-
-      await waitFor(() => {
         expect(console.error).toHaveBeenCalled();
       });
     });
@@ -137,12 +134,12 @@ describe("ShareButton Component", () => {
 
   describe("Accessibility", () => {
     it("should have aria-label attribute", () => {
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       expect(screen.getByRole("button")).toHaveAttribute("aria-label");
     });
 
     it("should be keyboard accessible", () => {
-      render(<ShareButton imageUrl={mockImageUrl} cardBlob={mockCardBlob} />);
+      render(<ShareButton imageBlob={mockImageBlob} cardBlob={mockCardBlob} />);
       const shareButton = screen.getByRole("button");
       shareButton.focus();
       expect(shareButton).toHaveFocus();

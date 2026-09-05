@@ -44,7 +44,6 @@ export default function Home(): JSX.Element {
 
   const blobUrl = useBlobUrl(imageBlob);
   const customCardUrl = useBlobUrl(customCardBlob);
-  const shareImageUrl = useBlobUrl(imageBlob);
 
   const isLoading = imageLoading || cardLoading || !imageBlob || !customCardBlob;
 
@@ -92,8 +91,8 @@ export default function Home(): JSX.Element {
                     />
                   </div>
                 )}
-                {imageBlob && customCardBlob && shareImageUrl && (
-                  <ShareButton imageUrl={shareImageUrl} cardBlob={customCardBlob} />
+                {imageBlob && customCardBlob && (
+                  <ShareButton imageBlob={imageBlob} cardBlob={customCardBlob} />
                 )}
                 <EditButton textToEdit={editText} onSave={(newText) => setEditText(newText)} />
               </div>

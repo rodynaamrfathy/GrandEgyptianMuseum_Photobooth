@@ -130,15 +130,45 @@ describe("useRemoteImage Hook and Utilities", () => {
       expect(result.current.error).toBe(null);
     });
 
-    it("should not fetch when imageId is invalid format", async () => {
-      (window as { location?: unknown }).location = { search: "?image=invalid_id" } as Location;
+    it("should attempt to resolve a non-imageId ?image= value as a kiosk QR token", async () => {
+      (window as { location?: unknown }).location = {
+        search: "?image=invalid_id",
+      } as Location;
+      // Decrypt endpoint returns 404 → hook surfaces error.
+      mockFetch.mockResolvedValueOnce({ ok: false, json: () => Promise.resolve({}) });
+
       const { result } = renderHook(() => useRemoteImage());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
-      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch.mock.calls[0][0]).toContain("/decrypt-token?token=invalid_id");
       expect(result.current.imageBlob).toBe(null);
+      expect(result.current.error).toBe("Invalid photo link");
+    });
+
+    it("should fetch the resolved URL when a QR token decrypts successfully", async () => {
+      (window as { location?: unknown }).location = {
+        search: "?image=encrypted-token-value",
+      } as Location;
+      const mockBlob = new Blob(["png"], { type: "image/png" });
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ image_url: "https://signed.example.com/img.png" }),
+        })
+        .mockResolvedValueOnce({ ok: true, blob: () => Promise.resolve(mockBlob) });
+
+      const { result } = renderHook(() => useRemoteImage());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch.mock.calls[0][0]).toContain("/decrypt-token?token=encrypted-token-value");
+      expect(mockFetch.mock.calls[1][0]).toBe("https://signed.example.com/img.png");
+      expect(result.current.imageBlob).toBe(mockBlob);
     });
 
     it("should set loading state correctly", async () => {
