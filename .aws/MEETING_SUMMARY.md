@@ -149,3 +149,18 @@ Defaults shown. All have working defaults — none required to be set except `Ki
 | Alarm SNS subscription | ⚠️ Pending email confirmation | `rodynaamr@icloud.com` |
 | Old stack teardown | ❌ Not done | `GEM-booth-v4` still running |
 | Custom domain | ❌ Not done | On `*.cloudfront.net` |
+
+## Post-deploy checklist (Milan, museum production account)
+
+The above table is from the earlier personal-account prototype. This section tracks the real deploy: stack `gem-photobooth` in `eu-south-1`, account `311145409425`.
+
+| Item | Status |
+|---|---|
+| Execute deploy (blocked on IT's `apigateway:POST` on `/tags/*`) | ⏳ Pending |
+| Build + `aws s3 sync` frontend to `FrontendBucket` | ⏳ After stack exists |
+| Smoke-test all 4 endpoints | ⏳ After stack exists |
+| Wire up `KioskTrustedAccountArns` for this account | ⏳ Open — tested on personal account, needs porting |
+| Set `AlarmEmail` + confirm SNS subscription | ⏳ Open |
+| Custom domain + HTTPS (ACM + DNS) | ⏳ After initial deploy, per plan |
+| AWS Budget / cost alarm | ⏳ Not set up |
+| **Run the AWS Well-Architected Tool review** against the live stack, across all 6 pillars, once the above is stable | ⏳ Planned — do this after initial launch settles, then periodically as the workload changes |
