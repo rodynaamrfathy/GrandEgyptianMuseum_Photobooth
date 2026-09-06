@@ -7,3 +7,7 @@ node_modules/
 # editor
 .vscode/
 .idea/
+
+# local secrets — never commit
+*.local.txt
+*.local.json
